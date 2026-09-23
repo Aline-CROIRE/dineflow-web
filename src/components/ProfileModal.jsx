@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
-import { X } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
@@ -114,7 +114,15 @@ const Label = styled.label`
   color: ${({ theme }) => theme.colors.latte};
 `;
 
+const PasswordWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+`;
+
 const Input = styled.input`
+  width: 100%;
   background-color: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 10px;
@@ -124,6 +132,30 @@ const Input = styled.input`
 
   &:disabled {
     opacity: 0.6;
+  }
+
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.burntCaramel};
+  }
+`;
+
+const PasswordInput = styled(Input)`
+  padding-right: 44px;
+`;
+
+const EyeBtn = styled.button`
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.latte};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.vanilla};
   }
 `;
 
@@ -156,6 +188,10 @@ export default function ProfileModal({ isOpen, onClose }) {
   const [lastName, setLastName] = useState("");
   const [msg, setMsg] = useState(null);
   const [isError, setIsError] = useState(false);
+
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [passwordData, setPasswordData] = useState({
     old_password: "",
@@ -279,32 +315,47 @@ export default function ProfileModal({ isOpen, onClose }) {
           <Form onSubmit={handleChangePassword}>
             <Field>
               <Label>Current Password</Label>
-              <Input
-                type="password"
-                required
-                value={passwordData.old_password}
-                onChange={(e) => setPasswordData({ ...passwordData, old_password: e.target.value })}
-              />
+              <PasswordWrapper>
+                <PasswordInput
+                  type={showOldPassword ? "text" : "password"}
+                  required
+                  value={passwordData.old_password}
+                  onChange={(e) => setPasswordData({ ...passwordData, old_password: e.target.value })}
+                />
+                <EyeBtn type="button" onClick={() => setShowOldPassword(!showOldPassword)}>
+                  {showOldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </EyeBtn>
+              </PasswordWrapper>
             </Field>
 
             <Field>
               <Label>New Password</Label>
-              <Input
-                type="password"
-                required
-                value={passwordData.new_password}
-                onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-              />
+              <PasswordWrapper>
+                <PasswordInput
+                  type={showNewPassword ? "text" : "password"}
+                  required
+                  value={passwordData.new_password}
+                  onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
+                />
+                <EyeBtn type="button" onClick={() => setShowNewPassword(!showNewPassword)}>
+                  {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </EyeBtn>
+              </PasswordWrapper>
             </Field>
 
             <Field>
               <Label>Confirm New Password</Label>
-              <Input
-                type="password"
-                required
-                value={passwordData.new_password_confirm}
-                onChange={(e) => setPasswordData({ ...passwordData, new_password_confirm: e.target.value })}
-              />
+              <PasswordWrapper>
+                <PasswordInput
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  value={passwordData.new_password_confirm}
+                  onChange={(e) => setPasswordData({ ...passwordData, new_password_confirm: e.target.value })}
+                />
+                <EyeBtn type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </EyeBtn>
+              </PasswordWrapper>
             </Field>
 
             <SubmitBtn type="submit">Update Password</SubmitBtn>

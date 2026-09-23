@@ -331,12 +331,18 @@ export default function AuthModal({ isOpen, onClose }) {
       await login(formData.username, formData.password);
       onClose();
     } catch (err) {
-      if (err.response?.data?.needs_verification) {
-        setRegisteredEmail(err.response.data.email);
+      const errorData = err.response?.data;
+      if (errorData?.needs_verification) {
+        setRegisteredEmail(errorData.email);
         setStep("verify");
         setNotification("Please enter the 6-digit code sent to your email.");
       } else {
-        setError(err.response?.data?.detail || "Invalid username or password.");
+        const specificMessage =
+          errorData?.username?.[0] ||
+          errorData?.password?.[0] ||
+          errorData?.detail ||
+          "Could not sign in. Please verify your credentials.";
+        setError(specificMessage);
       }
     } finally {
       setLoading(false);
