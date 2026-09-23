@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Search, Plus, Check } from "lucide-react";
 import apiClient from "../api/client";
 import { useCart } from "../context/CartContext";
+import DishDetailModal from "./DishDetailModal";
 
 const Section = styled.section`
   max-width: 1280px;
@@ -158,6 +159,7 @@ const DishCard = styled.div`
   justify-content: space-between;
   gap: 18px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
   transition: transform 0.2s ease, border-color 0.2s ease;
 
   &:hover {
@@ -248,6 +250,7 @@ export default function MenuSection() {
   const [searchQuery, setSearchQuery] = useState("");
   const [ordering, setOrdering] = useState("name");
   const [addedItemIds, setAddedItemIds] = useState({});
+  const [selectedDishModal, setSelectedDishModal] = useState(null);
 
   useEffect(() => {
     apiClient
@@ -271,7 +274,8 @@ export default function MenuSection() {
       .catch(() => setItems([]));
   }, [selectedCategory, searchQuery, ordering]);
 
-  const handleAdd = (dish) => {
+  const handleDirectAdd = (e, dish) => {
+    e.stopPropagation();
     addItem(dish);
     setAddedItemIds((prev) => ({ ...prev, [dish.id]: true }));
 
@@ -334,7 +338,7 @@ export default function MenuSection() {
       ) : (
         <DishesGrid>
           {items.map((dish) => (
-            <DishCard key={dish.id}>
+            <DishCard key={dish.id} onClick={() => setSelectedDishModal(dish)}>
               <div>
                 <DishHeader>
                   <DishName>{dish.name}</DishName>
@@ -349,7 +353,7 @@ export default function MenuSection() {
                 <Price>{formatRWF(dish.price)}</Price>
                 <AddButton
                   $added={addedItemIds[dish.id]}
-                  onClick={() => handleAdd(dish)}
+                  onClick={(e) => handleDirectAdd(e, dish)}
                   aria-label="Add to order"
                 >
                   {addedItemIds[dish.id] ? <Check size={18} /> : <Plus size={18} />}
@@ -359,6 +363,12 @@ export default function MenuSection() {
           ))}
         </DishesGrid>
       )}
+
+      <DishDetailModal
+        dish={selectedDishModal}
+        isOpen={Boolean(selectedDishModal)}
+        onClose={() => setSelectedDishModal(null)}
+      />
     </Section>
   );
 }

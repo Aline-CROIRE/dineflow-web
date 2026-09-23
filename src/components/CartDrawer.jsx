@@ -173,6 +173,24 @@ const Select = styled.select`
   outline: none;
 `;
 
+const PaymentMethodGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+`;
+
+const MethodBtn = styled.button`
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: ${({ $active, theme }) => ($active ? theme.colors.vanilla : theme.colors.textMuted)};
+  background-color: ${({ $active, theme }) => ($active ? theme.colors.cardElevated : theme.colors.card)};
+  border: 1px solid
+    ${({ $active, theme }) => ($active ? theme.colors.burntCaramel : theme.colors.border)};
+  transition: all 0.2s;
+`;
+
 const SubtotalRow = styled.div`
   display: flex;
   align-items: center;
@@ -270,6 +288,7 @@ export default function CartDrawer({ onRequireAuth }) {
 
   const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("CARD");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeOrder, setActiveOrder] = useState(null);
@@ -331,7 +350,7 @@ export default function CartDrawer({ onRequireAuth }) {
 
     try {
       const response = await apiClient.post(`restaurant/orders/${orderId}/pay/`, {
-        payment_method: "CARD",
+        payment_method: paymentMethod,
       });
       setPaymentSuccess(response.data);
       setActiveOrder(null);
@@ -361,7 +380,7 @@ export default function CartDrawer({ onRequireAuth }) {
               Check Settled
             </h3>
             <p style={{ fontSize: "14px", color: "#E7C6A1", lineHeight: 1.5 }}>
-              Payment of {Math.round(parseFloat(paymentSuccess.amount)).toLocaleString()} RWF was confirmed.
+              Payment of {Math.round(parseFloat(paymentSuccess.amount)).toLocaleString()} RWF was confirmed via {paymentSuccess.payment_method}.
             </p>
             <OrderBtn
               style={{ marginTop: "16px", width: "100%" }}
@@ -379,18 +398,41 @@ export default function CartDrawer({ onRequireAuth }) {
               <Check size={28} />
             </CheckCircle>
             <h3 style={{ fontSize: "20px", fontWeight: 900, color: "#FFF0DC" }}>
-              Order Placed
+              Order Received
             </h3>
             <p style={{ fontSize: "14px", color: "#E7C6A1", lineHeight: 1.5 }}>
               Order #{activeOrder.id} is being prepared for Table {activeOrder.table_number}.
             </p>
-            <div style={{ width: "100%", marginTop: "14px" }}>
+
+            <div style={{ width: "100%", marginTop: "10px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <Label style={{ textAlign: "left" }}>Choose Settlement Method</Label>
+              <PaymentMethodGrid>
+                <MethodBtn
+                  $active={paymentMethod === "CARD"}
+                  onClick={() => setPaymentMethod("CARD")}
+                >
+                  Card
+                </MethodBtn>
+                <MethodBtn
+                  $active={paymentMethod === "CASH"}
+                  onClick={() => setPaymentMethod("CASH")}
+                >
+                  Cash at Table
+                </MethodBtn>
+                <MethodBtn
+                  $active={paymentMethod === "ONLINE"}
+                  onClick={() => setPaymentMethod("ONLINE")}
+                >
+                  Mobile Money
+                </MethodBtn>
+              </PaymentMethodGrid>
+
               <PayBtn
-                style={{ width: "100%" }}
+                style={{ width: "100%", marginTop: "6px" }}
                 disabled={loading}
                 onClick={() => handlePayOrder(activeOrder.id)}
               >
-                {loading ? "Processing..." : `Settle Bill (${Math.round(parseFloat(activeOrder.total_amount)).toLocaleString()} RWF)`}
+                {loading ? "Processing..." : `Settle Check (${Math.round(parseFloat(activeOrder.total_amount)).toLocaleString()} RWF)`}
               </PayBtn>
             </div>
           </SuccessReceipt>
@@ -425,7 +467,7 @@ export default function CartDrawer({ onRequireAuth }) {
 
             <DrawerFooter>
               <FieldGroup>
-                <Label htmlFor="table-select">Select Your Table</Label>
+                <Label htmlFor="table-select">Dining Table</Label>
                 <Select
                   id="table-select"
                   value={selectedTable}

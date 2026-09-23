@@ -392,6 +392,8 @@ export default function StaffDashboardModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       fetchAllData();
+      const interval = setInterval(fetchAllData, 10000);
+      return () => clearInterval(interval);
     }
   }, [isOpen]);
 
@@ -492,7 +494,7 @@ export default function StaffDashboardModal({ isOpen, onClose }) {
         <HeaderRow>
           <TitleBlock>
             <Title>Restaurant Operations</Title>
-            <Subtitle>Kitchen progression, table floor, culinary catalog, and analytics.</Subtitle>
+            <Subtitle>Live auto-sync enabled (10s refresh).</Subtitle>
           </TitleBlock>
           <CloseBtn onClick={onClose}>
             <X size={18} />
