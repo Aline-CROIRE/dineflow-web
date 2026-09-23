@@ -1,5 +1,5 @@
 
-# DINEFLOW Web — Restaurant Management Frontend
+# DINEFLOW Web Restaurant Management System
 
 DINEFLOW Web is a responsive restaurant web application built with **React 18** and **styled-components**. It connects to a serverless **Django REST Framework** API on Vercel and a cloud **PostgreSQL** database on Neon.tech.
 
