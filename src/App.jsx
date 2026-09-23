@@ -3,8 +3,9 @@ import styled, { ThemeProvider } from "styled-components";
 import { theme } from "./theme/theme";
 import { GlobalStyles } from "./theme/GlobalStyles";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import Navbar from "./components/NavBar";
-import AuthModal from "./components/AuthModel";
+import Navbar from "./components/Navbar";
+import AuthModal from "./components/AuthModal";
+import MenuSection from "./components/MenuSection";
 import apiClient from "./api/client";
 import { ArrowRight, CalendarDays, Clock, ShieldCheck, RefreshCw } from "lucide-react";
 
@@ -15,16 +16,15 @@ const AppContainer = styled.div`
 `;
 
 const MainContent = styled.main`
-  flex: 1;
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-  padding: 60px 24px;
+  padding: 60px 24px 20px;
   display: flex;
   align-items: center;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    padding: 40px 20px;
+    padding: 40px 20px 20px;
   }
 `;
 
@@ -99,7 +99,7 @@ const ButtonGroup = styled.div`
   margin-top: 8px;
 `;
 
-const PrimaryActionButton = styled.button`
+const PrimaryActionButton = styled.a`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -241,25 +241,25 @@ function MainDashboard() {
       <MainContent>
         <Grid>
           <HeroTextContainer>
-            <Badge>Artisanal Bistro Experience</Badge>
+            <Badge>Welcome to DineFlow</Badge>
 
             <Title>
-              Culinary Warmth Meets <GradientText>Modern Service.</GradientText>
+              Warm Hospitality Meets <GradientText>Artisanal Flavors.</GradientText>
             </Title>
 
             <Subtitle>
-              Explore our chef-crafted recipes, reserve your dining table effortlessly, and settle checks seamlessly from your table.
+              Browse our chef-curated selection, reserve your table with ease, and enjoy a seamless dining experience.
             </Subtitle>
 
             <ButtonGroup>
-              <PrimaryActionButton>
-                Explore Menu
+              <PrimaryActionButton href="#menu">
+                View Menu
                 <ArrowRight size={18} />
               </PrimaryActionButton>
 
               <SecondaryActionButton onClick={() => (!user ? setAuthModalOpen(true) : null)}>
                 <CalendarDays size={18} />
-                Book Table
+                Reserve Table
               </SecondaryActionButton>
             </ButtonGroup>
           </HeroTextContainer>
@@ -270,10 +270,10 @@ function MainDashboard() {
               <CardHeader>
                 <div>
                   <h3 style={{ fontSize: "18px", fontWeight: 800, color: theme.colors.vanilla }}>
-                    Live Dining Floor
+                    Dining Room Status
                   </h3>
                   <p style={{ fontSize: "12px", color: theme.colors.textMuted }}>
-                    Connected to Neon PostgreSQL Backend
+                    Today's dining availability
                   </p>
                 </div>
 
@@ -286,7 +286,7 @@ function MainDashboard() {
                 <MetricTile>
                   <MetricLabel>
                     <Clock size={14} />
-                    Kitchen Status
+                    Dining Service
                   </MetricLabel>
                   <MetricValue $highlight>{status?.status || "OPEN"}</MetricValue>
                 </MetricTile>
@@ -294,7 +294,7 @@ function MainDashboard() {
                 <MetricTile>
                   <MetricLabel>
                     <ShieldCheck size={14} />
-                    Free Tables
+                    Available Tables
                   </MetricLabel>
                   <MetricValue>{status?.available_tables ?? "--"}</MetricValue>
                 </MetricTile>
@@ -303,6 +303,8 @@ function MainDashboard() {
           </CardWrapper>
         </Grid>
       </MainContent>
+
+      <MenuSection onSelectItem={(item) => console.log("Selected dish:", item)} />
 
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </AppContainer>

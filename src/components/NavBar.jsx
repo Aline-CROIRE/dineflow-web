@@ -208,13 +208,15 @@ const MobileDrawer = styled.div`
 export default function Navbar({ onOpenAuth }) {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [systemStatus, setSystemStatus] = useState("CHECKING");
+  const [serviceStatus, setServiceStatus] = useState("Open");
 
   useEffect(() => {
     apiClient
       .get("restaurant/status/")
-      .then((res) => setSystemStatus(res.data.status))
-      .catch(() => setSystemStatus("OFFLINE"));
+      .then((res) => {
+        setServiceStatus(res.data.status === "OPEN" ? "Open" : "Closed");
+      })
+      .catch(() => setServiceStatus("Closed"));
   }, []);
 
   return (
@@ -226,7 +228,7 @@ export default function Navbar({ onOpenAuth }) {
           </LogoBadge>
           <BrandText>
             <BrandTitle>DINEFLOW</BrandTitle>
-            <BrandSubtitle>Bistro & Table Experience</BrandSubtitle>
+            <BrandSubtitle>Restaurant & Lounge</BrandSubtitle>
           </BrandText>
         </LogoWrapper>
 
@@ -236,8 +238,8 @@ export default function Navbar({ onOpenAuth }) {
           <NavLink href="#orders">My Orders</NavLink>
 
           <StatusBadge>
-            <StatusDot $isOpen={systemStatus === "OPEN"} />
-            <StatusText>Service: {systemStatus}</StatusText>
+            <StatusDot $isOpen={serviceStatus === "Open"} />
+            <StatusText>{serviceStatus}</StatusText>
           </StatusBadge>
         </NavLinks>
 
@@ -276,15 +278,31 @@ export default function Navbar({ onOpenAuth }) {
           </NavLink>
           {user ? (
             <button
-              onClick={() => { logout(); setIsOpen(false); }}
-              style={{ padding: "12px", background: "transparent", color: "#E7C6A1", textAlign: "left" }}
+              onClick={() => {
+                logout();
+                setIsOpen(false);
+              }}
+              style={{
+                padding: "12px",
+                background: "transparent",
+                color: "#E7C6A1",
+                textAlign: "left",
+              }}
             >
               Sign Out ({user.username})
             </button>
           ) : (
             <button
-              onClick={() => { onOpenAuth(); setIsOpen(false); }}
-              style={{ padding: "12px", background: "#7B4B3A", color: "#FFF0DC", borderRadius: "10px" }}
+              onClick={() => {
+                onOpenAuth();
+                setIsOpen(false);
+              }}
+              style={{
+                padding: "12px",
+                background: "#7B4B3A",
+                color: "#FFF0DC",
+                borderRadius: "10px",
+              }}
             >
               Sign In
             </button>
