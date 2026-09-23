@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { theme } from "./theme/theme";
 import { GlobalStyles } from "./theme/GlobalStyles";
@@ -13,7 +13,6 @@ import StaffDashboardModal from "./components/StaffDashboardModal";
 import ProfileModal from "./components/ProfileModal";
 import MenuSection from "./components/MenuSection";
 import AmbientArtCanvas from "./components/AmbientArtCanvas";
-import apiClient from "./api/client";
 import { ArrowRight, CalendarDays, ShoppingBag, Sparkles, Star } from "lucide-react";
 
 const AppContainer = styled.div`
@@ -40,7 +39,7 @@ const MainContent = styled.main`
   position: relative;
   z-index: 1;
   width: 100%;
-  padding: clamp(20px, 3vh, 36px) clamp(16px, 4vw, 56px);
+  padding: clamp(24px, 4vh, 42px) clamp(16px, 4vw, 56px);
   display: flex;
   align-items: center;
 `;
@@ -48,19 +47,19 @@ const MainContent = styled.main`
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(28px, 4vw, 56px);
+  gap: clamp(32px, 5vw, 64px);
   align-items: center;
   width: 100%;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    grid-template-columns: 1.15fr 0.85fr;
+    grid-template-columns: 1.1fr 0.9fr;
   }
 `;
 
 const HeroTextContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: clamp(14px, 2vh, 20px);
+  gap: clamp(14px, 2vh, 22px);
 `;
 
 const Badge = styled.div`
@@ -80,7 +79,7 @@ const Badge = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: clamp(30px, 4.2vw, 56px);
+  font-size: clamp(32px, 4.4vw, 58px);
   font-weight: 900;
   line-height: 1.12;
   letter-spacing: -0.5px;
@@ -98,7 +97,7 @@ const Subtitle = styled.p`
   font-size: clamp(14px, 1.5vw, 17px);
   color: ${({ theme }) => theme.colors.textMuted};
   line-height: 1.6;
-  max-width: 640px;
+  max-width: 620px;
 `;
 
 const ButtonGroup = styled.div`
@@ -162,55 +161,54 @@ const SecondaryActionButton = styled.button`
   }
 `;
 
-const ShowcaseWrapper = styled.div`
+const ShowcaseComposition = styled.div`
   position: relative;
   width: 100%;
-  display: flex;
-  justify-content: center;
+  max-width: 520px;
+  margin: 0 auto;
 `;
 
-const ShowcaseGlow = styled.div`
+const CompositionGlow = styled.div`
   position: absolute;
-  inset: -12px;
+  inset: -14px;
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  opacity: 0.18;
-  filter: blur(40px);
-  border-radius: 36px;
+  opacity: 0.16;
+  filter: blur(45px);
+  border-radius: 40px;
   z-index: 0;
 `;
 
-const ShowcaseCard = styled.div`
+const MainPlateCard = styled.div`
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 520px;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 26px;
-  padding: clamp(16px, 2.5vh, 22px);
+  border-radius: 28px;
+  padding: clamp(14px, 2.5vh, 20px);
   display: flex;
   flex-direction: column;
   gap: 14px;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7);
 `;
 
-const DishImageFrame = styled.div`
+const MainImageFrame = styled.div`
   position: relative;
   width: 100%;
-  height: clamp(180px, 26vh, 250px);
-  border-radius: 18px;
+  height: clamp(180px, 26vh, 240px);
+  border-radius: 20px;
   overflow: hidden;
   border: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
-const DishImage = styled.img`
+const MainImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 `;
 
-const FloatingSpecialTag = styled.div`
+const FloatingTag = styled.div`
   position: absolute;
   top: 12px;
   left: 12px;
@@ -225,11 +223,11 @@ const FloatingSpecialTag = styled.div`
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 `;
 
-const RatingPill = styled.div`
+const RatingBadge = styled.div`
   position: absolute;
   bottom: 12px;
   right: 12px;
-  background-color: rgba(25, 21, 21, 0.85);
+  background-color: rgba(25, 21, 21, 0.88);
   backdrop-filter: blur(8px);
   border: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.latte};
@@ -242,82 +240,63 @@ const RatingPill = styled.div`
   gap: 5px;
 `;
 
-const ShowcaseFooter = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-`;
-
-const DishMeta = styled.div`
+const DishContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
 `;
 
-const DishTitle = styled.h3`
-  font-size: 18px;
+const DishName = styled.h3`
+  font-size: 19px;
   font-weight: 900;
   color: ${({ theme }) => theme.colors.vanilla};
 `;
 
-const DishTagline = styled.span`
+const DishDesc = styled.span`
   font-size: 13px;
   color: ${({ theme }) => theme.colors.textMuted};
   line-height: 1.4;
 `;
 
-const CulinaryChipsRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  padding-top: 4px;
-`;
-
-const CulinaryChip = styled.span`
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 6px;
+const MiniOverlapCard = styled.div`
+  position: absolute;
+  bottom: -22px;
+  right: -16px;
+  z-index: 2;
+  width: clamp(160px, 22vw, 210px);
   background-color: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  color: ${({ theme }) => theme.colors.latte};
+  border-radius: 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8);
+  transform: rotate(2deg);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: rotate(0deg) scale(1.03);
+  }
+
+  @media (max-width: 640px) {
+    display: none;
+  }
 `;
 
-const TableServiceBar = styled.div`
-  background: ${({ theme }) => theme.colors.cardElevated};
-  border: 1px solid ${({ theme }) => theme.colors.border};
+const MiniImage = styled.img`
+  width: 100%;
+  height: 95px;
+  object-fit: cover;
   border-radius: 12px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  display: block;
 `;
 
-const ServiceStatusText = styled.span`
-  font-size: 11px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.latte};
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`;
-
-const ServicePulse = styled.span`
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: ${({ theme }) => theme.colors.success};
-  box-shadow: 0 0 8px ${({ theme }) => theme.colors.success};
-`;
-
-const TablesFreeCount = styled.span`
+const MiniLabel = styled.span`
   font-size: 11px;
   font-weight: 800;
   color: ${({ theme }) => theme.colors.vanilla};
+  text-align: center;
 `;
 
 const MobileStickyBar = styled.button`
@@ -348,15 +327,7 @@ function MainDashboard() {
   const [ordersModalOpen, setOrdersModalOpen] = useState(false);
   const [staffModalOpen, setStaffModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [status, setStatus] = useState(null);
   const [menuRefreshTrigger, setMenuRefreshTrigger] = useState(0);
-
-  useEffect(() => {
-    apiClient
-      .get("restaurant/status/")
-      .then((res) => setStatus(res.data))
-      .catch(() => {});
-  }, []);
 
   const handleOpenReservation = () => {
     if (!user) {
@@ -392,7 +363,7 @@ function MainDashboard() {
             <HeroTextContainer>
               <Badge>
                 <Sparkles size={12} />
-                Fine Dining & Lounge
+                Artisanal Kitchen & Lounge
               </Badge>
 
               <Title>
@@ -416,45 +387,37 @@ function MainDashboard() {
               </ButtonGroup>
             </HeroTextContainer>
 
-            <ShowcaseWrapper>
-              <ShowcaseGlow />
-              <ShowcaseCard>
-                <DishImageFrame>
-                  <DishImage
+            <ShowcaseComposition>
+              <CompositionGlow />
+              <MainPlateCard>
+                <MainImageFrame>
+                  <MainImage
                     src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=80"
-                    alt="Charcoal Grilled Ribeye Special"
+                    alt="Charcoal Grilled Prime Ribeye"
                     loading="lazy"
                   />
-                  <FloatingSpecialTag>Chef's Signature</FloatingSpecialTag>
-                  <RatingPill>
+                  <FloatingTag>Chef's Choice</FloatingTag>
+                  <RatingBadge>
                     <Star size={11} fill="#FF9F1C" color="#FF9F1C" />
                     4.9 (180+ Reviews)
-                  </RatingPill>
-                </DishImageFrame>
+                  </RatingBadge>
+                </MainImageFrame>
 
-                <ShowcaseFooter>
-                  <DishMeta>
-                    <DishTitle>Charcoal Grilled Prime Ribeye</DishTitle>
-                    <DishTagline>Aromatic herbs, garlic-infused butter, fire-roasted asparagus</DishTagline>
-                    <CulinaryChipsRow>
-                      <CulinaryChip>Wood-Smoked</CulinaryChip>
-                      <CulinaryChip>Prime Cut</CulinaryChip>
-                      <CulinaryChip>House Glaze</CulinaryChip>
-                    </CulinaryChipsRow>
-                  </DishMeta>
-                </ShowcaseFooter>
+                <DishContent>
+                  <DishName>Charcoal Grilled Prime Ribeye</DishName>
+                  <DishDesc>Aromatic fresh herbs, garlic-infused butter, fire-roasted asparagus</DishDesc>
+                </DishContent>
+              </MainPlateCard>
 
-                <TableServiceBar>
-                  <ServiceStatusText>
-                    <ServicePulse />
-                    {status?.status === "OPEN" ? "Kitchen & Dinner Service Active" : "Service Opens Soon"}
-                  </ServiceStatusText>
-                  <TablesFreeCount>
-                    {status?.available_tables ?? "--"} Tables Available
-                  </TablesFreeCount>
-                </TableServiceBar>
-              </ShowcaseCard>
-            </ShowcaseWrapper>
+              <MiniOverlapCard>
+                <MiniImage
+                  src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80"
+                  alt="Wood-Fired Pizza"
+                  loading="lazy"
+                />
+                <MiniLabel>Wood-Fired Pizza</MiniLabel>
+              </MiniOverlapCard>
+            </ShowcaseComposition>
           </Grid>
         </MainContent>
       </HeroWrapper>

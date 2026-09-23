@@ -370,10 +370,37 @@ export default function StaffDashboardModal({ isOpen, onClose, onMenuUpdated }) 
     description: "",
   });
 
+  const fetchAllMenuItems = async () => {
+    let collected = [];
+    let pageNum = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      try {
+        const res = await apiClient.get(`restaurant/menu-items/?page=${pageNum}`);
+        const data = res.data;
+        if (data.results) {
+          collected = [...collected, ...data.results];
+          if (data.next) {
+            pageNum += 1;
+          } else {
+            hasMore = false;
+          }
+        } else {
+          collected = data;
+          hasMore = false;
+        }
+      } catch {
+        hasMore = false;
+      }
+    }
+    setMenuItems(collected);
+  };
+
   const fetchAllData = () => {
     apiClient.get("restaurant/orders/").then((res) => setOrders(res.data.results || res.data || [])).catch(() => {});
     apiClient.get("restaurant/tables/").then((res) => setTables(res.data.results || res.data || [])).catch(() => {});
-    apiClient.get("restaurant/menu-items/").then((res) => setMenuItems(res.data.results || res.data || [])).catch(() => {});
+    fetchAllMenuItems();
     apiClient.get("restaurant/categories/").then((res) => {
       const cats = res.data.results || res.data || [];
       setCategories(cats);
@@ -639,7 +666,7 @@ export default function StaffDashboardModal({ isOpen, onClose, onMenuUpdated }) 
           {tab === "menu" && (
             <>
               <ActionHeader>
-                <SectionSubhead>Culinary Offerings</SectionSubhead>
+                <SectionSubhead>Culinary Offerings ({menuItems.length} Dishes Total)</SectionSubhead>
                 <ToggleFormBtn onClick={() => setShowAddDish(!showAddDish)}>
                   <Plus size={14} /> Add New Dish
                 </ToggleFormBtn>
