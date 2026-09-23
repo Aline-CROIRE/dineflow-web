@@ -3,9 +3,12 @@ import styled, { ThemeProvider } from "styled-components";
 import { theme } from "./theme/theme";
 import { GlobalStyles } from "./theme/GlobalStyles";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/Navbar";
 import AuthModal from "./components/AuthModal";
 import ReservationModal from "./components/ReservationModal";
+import CartDrawer from "./components/CartDrawer";
+import OrdersModal from "./components/OrdersModal";
 import MenuSection from "./components/MenuSection";
 import apiClient from "./api/client";
 import { ArrowRight, CalendarDays, Clock, ShieldCheck, RefreshCw } from "lucide-react";
@@ -223,6 +226,7 @@ function MainDashboard() {
   const { user } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [reservationModalOpen, setReservationModalOpen] = useState(false);
+  const [ordersModalOpen, setOrdersModalOpen] = useState(false);
   const [status, setStatus] = useState(null);
 
   const fetchStatus = () => {
@@ -244,11 +248,20 @@ function MainDashboard() {
     }
   };
 
+  const handleOpenOrders = () => {
+    if (!user) {
+      setAuthModalOpen(true);
+    } else {
+      setOrdersModalOpen(true);
+    }
+  };
+
   return (
     <AppContainer>
       <Navbar
         onOpenAuth={() => setAuthModalOpen(true)}
         onOpenReservation={handleOpenReservation}
+        onOpenOrders={handleOpenOrders}
       />
 
       <MainContent>
@@ -317,13 +330,15 @@ function MainDashboard() {
         </Grid>
       </MainContent>
 
-      <MenuSection onSelectItem={(item) => console.log("Selected dish:", item)} />
+      <MenuSection />
 
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
       <ReservationModal
         isOpen={reservationModalOpen}
         onClose={() => setReservationModalOpen(false)}
       />
+      <CartDrawer onRequireAuth={() => setAuthModalOpen(true)} />
+      <OrdersModal isOpen={ordersModalOpen} onClose={() => setOrdersModalOpen(false)} />
     </AppContainer>
   );
 }
@@ -333,7 +348,9 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <GlobalStyles />
       <AuthProvider>
-        <MainDashboard />
+        <CartProvider>
+          <MainDashboard />
+        </CartProvider>
       </AuthProvider>
     </ThemeProvider>
   );

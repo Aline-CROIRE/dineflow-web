@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { UtensilsCrossed, LogIn, LogOut, Menu, X } from "lucide-react";
+import { UtensilsCrossed, LogIn, LogOut, Menu, X, ShoppingBag } from "lucide-react";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
 const Header = styled.header`
   position: sticky;
@@ -70,7 +71,7 @@ const BrandSubtitle = styled.span`
 const NavLinks = styled.nav`
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 28px;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: none;
@@ -102,28 +103,43 @@ const NavButton = styled.button`
   }
 `;
 
-const StatusBadge = styled.div`
+const RightCluster = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: 999px;
+  gap: 16px;
+`;
+
+const CartButton = styled.button`
+  position: relative;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.vanilla};
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.burntCaramel};
+  }
 `;
 
-const StatusDot = styled.span`
-  width: 8px;
-  height: 8px;
+const CartBadge = styled.span`
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: ${({ theme }) => theme.colors.burntCaramel};
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background-color: ${({ $isOpen, theme }) =>
-    $isOpen ? theme.colors.success : theme.colors.danger};
-`;
-
-const StatusText = styled.span`
-  font-size: 12px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.textSecondary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const UserBadge = styled.div`
@@ -206,32 +222,10 @@ const MobileMenuButton = styled.button`
   }
 `;
 
-const MobileDrawer = styled.div`
-  display: none;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px 24px 24px;
-    background-color: ${({ theme }) => theme.colors.background};
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  }
-`;
-
-export default function Navbar({ onOpenAuth, onOpenReservation }) {
+export default function Navbar({ onOpenAuth, onOpenReservation, onOpenOrders }) {
   const { user, logout } = useAuth();
+  const { totalItemsCount, setIsDrawerOpen } = useCart();
   const [isOpen, setIsOpen] = useState(false);
-  const [serviceStatus, setServiceStatus] = useState("Open");
-
-  useEffect(() => {
-    apiClient
-      .get("restaurant/status/")
-      .then((res) => {
-        setServiceStatus(res.data.status === "OPEN" ? "Open" : "Closed");
-      })
-      .catch(() => setServiceStatus("Closed"));
-  }, []);
 
   return (
     <Header>
@@ -249,88 +243,37 @@ export default function Navbar({ onOpenAuth, onOpenReservation }) {
         <NavLinks>
           <NavLink href="#menu">Menu</NavLink>
           <NavButton onClick={onOpenReservation}>Reservations</NavButton>
-
-          <StatusBadge>
-            <StatusDot $isOpen={serviceStatus === "Open"} />
-            <StatusText>{serviceStatus}</StatusText>
-          </StatusBadge>
+          {user && <NavButton onClick={onOpenOrders}>My Orders</NavButton>}
         </NavLinks>
 
-        {user ? (
-          <UserBadge>
-            <UserInfo>
-              <Username>{user.username}</Username>
-              <RoleTag>{user.role}</RoleTag>
-            </UserInfo>
-            <LogoutButton onClick={logout} title="Sign Out">
-              <LogOut size={16} />
-            </LogoutButton>
-          </UserBadge>
-        ) : (
-          <ActionButton onClick={onOpenAuth}>
-            <LogIn size={16} />
-            Sign In
-          </ActionButton>
-        )}
+        <RightCluster>
+          <CartButton onClick={() => setIsDrawerOpen(true)} title="View Order">
+            <ShoppingBag size={18} />
+            {totalItemsCount > 0 && <CartBadge>{totalItemsCount}</CartBadge>}
+          </CartButton>
 
-        <MobileMenuButton onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </MobileMenuButton>
-      </Container>
-
-      {isOpen && (
-        <MobileDrawer>
-          <NavLink href="#menu" onClick={() => setIsOpen(false)}>
-            Menu
-          </NavLink>
-          <button
-            onClick={() => {
-              onOpenReservation();
-              setIsOpen(false);
-            }}
-            style={{
-              padding: "8px 0",
-              background: "transparent",
-              color: "#E7C6A1",
-              textAlign: "left",
-              fontWeight: 600,
-            }}
-          >
-            Reservations
-          </button>
           {user ? (
-            <button
-              onClick={() => {
-                logout();
-                setIsOpen(false);
-              }}
-              style={{
-                padding: "12px",
-                background: "transparent",
-                color: "#E7C6A1",
-                textAlign: "left",
-              }}
-            >
-              Sign Out ({user.username})
-            </button>
+            <UserBadge>
+              <UserInfo>
+                <Username>{user.username}</Username>
+                <RoleTag>{user.role}</RoleTag>
+              </UserInfo>
+              <LogoutButton onClick={logout} title="Sign Out">
+                <LogOut size={16} />
+              </LogoutButton>
+            </UserBadge>
           ) : (
-            <button
-              onClick={() => {
-                onOpenAuth();
-                setIsOpen(false);
-              }}
-              style={{
-                padding: "12px",
-                background: "#7B4B3A",
-                color: "#FFF0DC",
-                borderRadius: "10px",
-              }}
-            >
+            <ActionButton onClick={onOpenAuth}>
+              <LogIn size={16} />
               Sign In
-            </button>
+            </ActionButton>
           )}
-        </MobileDrawer>
-      )}
+
+          <MobileMenuButton onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </MobileMenuButton>
+        </RightCluster>
+      </Container>
     </Header>
   );
 }

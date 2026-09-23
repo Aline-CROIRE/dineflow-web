@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Search, Plus, Check } from "lucide-react";
 import apiClient from "../api/client";
+import { useCart } from "../context/CartContext";
 
 const Section = styled.section`
   max-width: 1280px;
@@ -239,7 +240,8 @@ const EmptyState = styled.div`
   font-size: 15px;
 `;
 
-export default function MenuSection({ onSelectItem }) {
+export default function MenuSection() {
+  const { addItem } = useCart();
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("ALL");
@@ -270,12 +272,12 @@ export default function MenuSection({ onSelectItem }) {
   }, [selectedCategory, searchQuery, ordering]);
 
   const handleAdd = (dish) => {
+    addItem(dish);
     setAddedItemIds((prev) => ({ ...prev, [dish.id]: true }));
-    if (onSelectItem) onSelectItem(dish);
 
     setTimeout(() => {
       setAddedItemIds((prev) => ({ ...prev, [dish.id]: false }));
-    }, 1200);
+    }, 900);
   };
 
   const formatRWF = (amount) => {
