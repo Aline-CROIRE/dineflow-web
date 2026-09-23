@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
-import { X, Printer } from "lucide-react";
+import { X, Printer, Check } from "lucide-react";
 import apiClient from "../api/client";
 
 const fadeIn = keyframes`
@@ -229,6 +229,59 @@ const PayActionBtn = styled.button`
   }
 `;
 
+const SettleBox = styled.div`
+  background-color: ${({ theme }) => theme.colors.cardElevated};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const MethodGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+`;
+
+const MethodBtn = styled.button`
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  color: ${({ $active, theme }) => ($active ? theme.colors.vanilla : theme.colors.textMuted)};
+  background-color: ${({ $active, theme }) => ($active ? theme.colors.card : theme.colors.background)};
+  border: 1px solid
+    ${({ $active, theme }) => ($active ? theme.colors.burntCaramel : theme.colors.border)};
+  transition: all 0.2s;
+`;
+
+const ConfirmPayBtn = styled.button`
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  color: ${({ theme }) => theme.colors.vanilla};
+  background: ${({ theme }) => theme.colors.success};
+  box-shadow: 0 8px 20px rgba(82, 183, 136, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+`;
+
 const ReceiptBox = styled.div`
   background-color: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -246,6 +299,16 @@ const ReceiptRow = styled.div`
   color: ${({ theme }) => theme.colors.latte};
 `;
 
+const ErrorBanner = styled.div`
+  padding: 12px;
+  border-radius: 10px;
+  background-color: rgba(201, 124, 93, 0.15);
+  border: 1px solid ${({ theme }) => theme.colors.burntCaramel};
+  color: ${({ theme }) => theme.colors.vanilla};
+  font-size: 13px;
+  font-weight: 600;
+`;
+
 const EmptyState = styled.div`
   text-align: center;
   padding: 40px 0;
@@ -256,7 +319,10 @@ const EmptyState = styled.div`
 export default function OrdersModal({ isOpen, onClose }) {
   const [orders, setOrders] = useState([]);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
-  const [settlingId, setSettlingId] = useState(null);
+  const [activeSettleOrder, setActiveSettleOrder] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("CARD");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchOrders = () => {
     apiClient
@@ -269,6 +335,8 @@ export default function OrdersModal({ isOpen, onClose }) {
     if (isOpen) {
       fetchOrders();
       setSelectedReceipt(null);
+      setActiveSettleOrder(null);
+      setError(null);
       const interval = setInterval(fetchOrders, 8000);
       return () => clearInterval(interval);
     }
@@ -276,17 +344,27 @@ export default function OrdersModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleSettle = async (orderId) => {
-    setSettlingId(orderId);
+  const handleConfirmPayment = async () => {
+    if (!activeSettleOrder) return;
+    setLoading(true);
+    setError(null);
+
     try {
-      await apiClient.post(`restaurant/orders/${orderId}/pay/`, {
-        payment_method: "CARD",
+      const response = await apiClient.post(
+        `restaurant/orders/${activeSettleOrder.id}/pay/`,
+        { payment_method: paymentMethod }
+      );
+      setSelectedReceipt({
+        ...activeSettleOrder,
+        status: "COMPLETED",
+        payment: response.data,
       });
+      setActiveSettleOrder(null);
       fetchOrders();
     } catch (err) {
-      console.error(err);
+      setError(err.response?.data?.detail || "Payment settlement failed.");
     } finally {
-      setSettlingId(null);
+      setLoading(false);
     }
   };
 
@@ -309,17 +387,35 @@ export default function OrdersModal({ isOpen, onClose }) {
     <Overlay onClick={onClose}>
       <ModalCard onClick={(e) => e.stopPropagation()}>
         <HeaderRow className="no-print">
-          <Title>{selectedReceipt ? "Dining Receipt" : "My Orders"}</Title>
-          <CloseBtn onClick={selectedReceipt ? () => setSelectedReceipt(null) : onClose}>
+          <Title>
+            {selectedReceipt
+              ? "Dining Receipt"
+              : activeSettleOrder
+              ? "Settle Check"
+              : "My Orders"}
+          </Title>
+          <CloseBtn
+            onClick={
+              selectedReceipt
+                ? () => setSelectedReceipt(null)
+                : activeSettleOrder
+                ? () => setActiveSettleOrder(null)
+                : onClose
+            }
+          >
             <X size={18} />
           </CloseBtn>
         </HeaderRow>
+
+        {error && <ErrorBanner>{error}</ErrorBanner>}
 
         {selectedReceipt ? (
           <ReceiptBox id="printable-receipt">
             <div style={{ textAlign: "center", borderBottom: "1px solid #3B3131", paddingBottom: "12px" }}>
               <h3 style={{ fontSize: "18px", fontWeight: 900, color: "#FFF0DC" }}>DINEFLOW RESTAURANT</h3>
-              <p style={{ fontSize: "12px", color: "#9E867E", marginTop: "2px" }}>Official Receipt • Order #{selectedReceipt.id}</p>
+              <p style={{ fontSize: "12px", color: "#9E867E", marginTop: "2px" }}>
+                Official Receipt • Order #{selectedReceipt.id}
+              </p>
             </div>
 
             <ReceiptRow>
@@ -329,7 +425,7 @@ export default function OrdersModal({ isOpen, onClose }) {
 
             <ReceiptRow>
               <span>Status</span>
-              <span style={{ color: "#52B788", fontWeight: 800 }}>{selectedReceipt.status}</span>
+              <span style={{ color: "#52B788", fontWeight: 800 }}>COMPLETED</span>
             </ReceiptRow>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "6px", borderTop: "1px solid #3B3131", borderBottom: "1px solid #3B3131", padding: "12px 0" }}>
@@ -354,10 +450,64 @@ export default function OrdersModal({ isOpen, onClose }) {
                 onClick={() => setSelectedReceipt(null)}
                 style={{ flex: 1, padding: "12px", borderRadius: "10px", background: "#7B4B3A", color: "#FFF0DC", fontWeight: 800 }}
               >
-                Back
+                Back to Orders
               </button>
             </div>
           </ReceiptBox>
+        ) : activeSettleOrder ? (
+          <SettleBox>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <span style={{ fontSize: "16px", fontWeight: 800, color: "#FFF0DC" }}>
+                Order #{activeSettleOrder.id} • Table {activeSettleOrder.table_number}
+              </span>
+              <span style={{ fontSize: "13px", color: "#9E867E" }}>
+                Total check to settle: {Math.round(parseFloat(activeSettleOrder.total_amount)).toLocaleString()} RWF
+              </span>
+            </div>
+
+            <span style={{ fontSize: "12px", fontWeight: 800, color: "#E7C6A1", textTransform: "uppercase" }}>
+              Select Payment Method
+            </span>
+
+            <MethodGrid>
+              <MethodBtn
+                $active={paymentMethod === "CARD"}
+                onClick={() => setPaymentMethod("CARD")}
+              >
+                Card
+              </MethodBtn>
+              <MethodBtn
+                $active={paymentMethod === "CASH"}
+                onClick={() => setPaymentMethod("CASH")}
+              >
+                Cash at Table
+              </MethodBtn>
+              <MethodBtn
+                $active={paymentMethod === "ONLINE"}
+                onClick={() => setPaymentMethod("ONLINE")}
+              >
+                Mobile Money
+              </MethodBtn>
+            </MethodGrid>
+
+            <ConfirmPayBtn disabled={loading} onClick={handleConfirmPayment}>
+              {loading ? (
+                "Processing Settlement..."
+              ) : (
+                <>
+                  <Check size={18} />
+                  Confirm & Settle ({Math.round(parseFloat(activeSettleOrder.total_amount)).toLocaleString()} RWF)
+                </>
+              )}
+            </ConfirmPayBtn>
+
+            <button
+              onClick={() => setActiveSettleOrder(null)}
+              style={{ background: "transparent", color: "#9E867E", fontSize: "13px", fontWeight: 600, padding: "6px" }}
+            >
+              Cancel
+            </button>
+          </SettleBox>
         ) : (
           <OrdersList>
             {orders.length === 0 ? (
@@ -408,17 +558,15 @@ export default function OrdersModal({ isOpen, onClose }) {
                       </TotalAmount>
 
                       <ActionGroup>
-                        <SecondaryBtn onClick={() => setSelectedReceipt(o)}>
-                          Receipt
-                        </SecondaryBtn>
-                        {o.status !== "COMPLETED" && o.status !== "CANCELLED" && (
-                          <PayActionBtn
-                            disabled={settlingId === o.id}
-                            onClick={() => handleSettle(o.id)}
-                          >
-                            {settlingId === o.id ? "Settling..." : "Settle Check"}
+                        {o.status === "COMPLETED" ? (
+                          <SecondaryBtn onClick={() => setSelectedReceipt(o)}>
+                            Receipt
+                          </SecondaryBtn>
+                        ) : o.status !== "CANCELLED" ? (
+                          <PayActionBtn onClick={() => { setActiveSettleOrder(o); setError(null); }}>
+                            Settle Check
                           </PayActionBtn>
-                        )}
+                        ) : null}
                       </ActionGroup>
                     </OrderFooter>
                   </OrderCard>
