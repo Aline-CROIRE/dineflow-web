@@ -15,9 +15,10 @@ const Header = styled.header`
 `;
 
 const Container = styled.div`
-  max-width: 1280px;
+  max-width: 1600px;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 clamp(16px, 3vw, 24px);
+  padding: 0 clamp(16px, 4vw, 48px);
   height: clamp(68px, 8vw, 80px);
   display: flex;
   align-items: center;
@@ -73,7 +74,7 @@ const BrandSubtitle = styled.span`
 const NavLinks = styled.nav`
   display: none;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
     display: flex;

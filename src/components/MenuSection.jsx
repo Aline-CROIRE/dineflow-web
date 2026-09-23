@@ -6,9 +6,10 @@ import { useCart } from "../context/CartContext";
 import DishDetailModal from "./DishDetailModal";
 
 const Section = styled.section`
-  max-width: 1280px;
+  max-width: 1600px;
+  width: 100%;
   margin: 0 auto;
-  padding: 30px clamp(16px, 4vw, 24px) 80px;
+  padding: 30px clamp(16px, 4vw, 48px) 80px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -145,17 +146,8 @@ const CategoryChip = styled.button`
 
 const DishesGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-
-  @media (min-width: 600px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: clamp(16px, 2.5vw, 24px);
 `;
 
 const DishCard = styled.div`

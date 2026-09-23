@@ -38,10 +38,10 @@ const HeroWrapper = styled.div`
 const MainContent = styled.main`
   position: relative;
   z-index: 1;
-  max-width: 1280px;
+  max-width: 1600px;
   width: 100%;
   margin: 0 auto;
-  padding: clamp(16px, 2.5vh, 28px) clamp(16px, 3vw, 24px);
+  padding: clamp(20px, 3vh, 36px) clamp(16px, 4vw, 48px);
   display: flex;
   align-items: center;
 `;
@@ -81,7 +81,7 @@ const Badge = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: clamp(28px, 3.4vw, 44px);
+  font-size: clamp(28px, 3.8vw, 48px);
   font-weight: 900;
   line-height: 1.15;
   letter-spacing: -0.5px;
@@ -96,10 +96,10 @@ const GradientText = styled.span`
 `;
 
 const Subtitle = styled.p`
-  font-size: clamp(13px, 1.4vw, 15px);
+  font-size: clamp(13px, 1.4vw, 16px);
   color: ${({ theme }) => theme.colors.textMuted};
-  line-height: 1.55;
-  max-width: 480px;
+  line-height: 1.6;
+  max-width: 580px;
 `;
 
 const ButtonGroup = styled.div`
@@ -184,7 +184,7 @@ const ShowcaseCard = styled.div`
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 440px;
+  max-width: 500px;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 24px;
@@ -198,7 +198,7 @@ const ShowcaseCard = styled.div`
 const DishImageFrame = styled.div`
   position: relative;
   width: 100%;
-  height: clamp(160px, 24vh, 220px);
+  height: clamp(160px, 24vh, 230px);
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -365,6 +365,7 @@ function MainDashboard() {
           <Grid>
             <HeroTextContainer>
               <Badge>
+                <Sparkles size={12} />
                 Fine Dining & Lounge
               </Badge>
 
