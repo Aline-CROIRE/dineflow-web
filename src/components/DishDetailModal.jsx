@@ -167,7 +167,7 @@ const ActionBtn = styled.button`
 `;
 
 export default function DishDetailModal({ dish, isOpen, onClose }) {
-  const { addItem, updateQuantity } = useCart();
+  const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -192,7 +192,7 @@ export default function DishDetailModal({ dish, isOpen, onClose }) {
       <ModalCard onClick={(e) => e.stopPropagation()}>
         <HeaderRow>
           <TitleBlock>
-            <CategoryPill>{dish.category_name || "Artisanal Kitchen"}</CategoryPill>
+            <CategoryPill>{dish.category_name || "Chef's Special"}</CategoryPill>
             <DishTitle>{dish.name}</DishTitle>
           </TitleBlock>
           <CloseBtn onClick={onClose}>
@@ -201,7 +201,7 @@ export default function DishDetailModal({ dish, isOpen, onClose }) {
         </HeaderRow>
 
         <Description>
-          {dish.description || "Prepared with fresh, locally-sourced seasonal ingredients by our culinary team."}
+          {dish.description || "Prepared with fresh ingredients by our culinary team."}
         </Description>
 
         <DetailRow>

@@ -297,7 +297,7 @@ export default function MenuSection() {
   return (
     <Section id="menu">
       <SectionHeader>
-        <Tagline>Artisanal Kitchen</Tagline>
+        <Tagline>Chef's Kitchen</Tagline>
         <SectionTitle>Our Menu</SectionTitle>
       </SectionHeader>
 

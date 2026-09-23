@@ -12,8 +12,9 @@ import OrdersModal from "./components/OrdersModal";
 import StaffDashboardModal from "./components/StaffDashboardModal";
 import ProfileModal from "./components/ProfileModal";
 import MenuSection from "./components/MenuSection";
+import AmbientArtCanvas from "./components/AmbientArtCanvas";
 import apiClient from "./api/client";
-import { ArrowRight, CalendarDays, Clock, ShieldCheck, RefreshCw, ShoppingBag } from "lucide-react";
+import { ArrowRight, CalendarDays, ShoppingBag, Sparkles } from "lucide-react";
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -22,11 +23,25 @@ const AppContainer = styled.div`
   overflow-x: hidden;
 `;
 
+const HeroWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  min-height: calc(100dvh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
 const MainContent = styled.main`
+  position: relative;
+  z-index: 1;
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-  padding: clamp(32px, 6vw, 60px) clamp(16px, 4vw, 24px) 20px;
+  padding: clamp(16px, 2.5vh, 28px) clamp(16px, 3vw, 24px);
   display: flex;
   align-items: center;
 `;
@@ -34,7 +49,7 @@ const MainContent = styled.main`
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(32px, 6vw, 60px);
+  gap: clamp(24px, 4vw, 48px);
   align-items: center;
   width: 100%;
 
@@ -46,7 +61,7 @@ const Grid = styled.div`
 const HeroTextContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: clamp(16px, 3vw, 24px);
+  gap: clamp(12px, 2vh, 18px);
 `;
 
 const Badge = styled.div`
@@ -55,22 +70,22 @@ const Badge = styled.div`
   gap: 8px;
   padding: 6px 14px;
   border-radius: 999px;
-  background: ${({ theme }) => theme.colors.card};
+  background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.latte};
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 1px;
   text-transform: uppercase;
   width: fit-content;
 `;
 
 const Title = styled.h1`
-  font-size: clamp(28px, 6vw, 54px);
+  font-size: clamp(28px, 3.4vw, 44px);
   font-weight: 900;
   line-height: 1.15;
   letter-spacing: -0.5px;
-  color: ${({ theme }) => theme.colors.textPrimary};
+  color: ${({ theme }) => theme.colors.vanilla};
   word-break: break-word;
 `;
 
@@ -81,10 +96,10 @@ const GradientText = styled.span`
 `;
 
 const Subtitle = styled.p`
-  font-size: clamp(14px, 2.5vw, 17px);
+  font-size: clamp(13px, 1.4vw, 15px);
   color: ${({ theme }) => theme.colors.textMuted};
-  line-height: 1.6;
-  max-width: 520px;
+  line-height: 1.55;
+  max-width: 480px;
 `;
 
 const ButtonGroup = styled.div`
@@ -104,13 +119,13 @@ const PrimaryActionButton = styled.a`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 30px);
+  padding: clamp(12px, 1.8vh, 14px) clamp(20px, 3vw, 26px);
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   color: ${({ theme }) => theme.colors.vanilla};
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  box-shadow: 0 8px 22px rgba(123, 75, 58, 0.35);
+  box-shadow: 0 8px 20px rgba(123, 75, 58, 0.35);
   transition: all 0.2s ease;
 
   &:hover {
@@ -128,9 +143,9 @@ const SecondaryActionButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: clamp(12px, 3vw, 16px) clamp(18px, 4vw, 26px);
+  padding: clamp(12px, 1.8vh, 14px) clamp(18px, 3vw, 24px);
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.latte};
   background-color: ${({ theme }) => theme.colors.card};
@@ -140,6 +155,7 @@ const SecondaryActionButton = styled.button`
   &:hover {
     background-color: ${({ theme }) => theme.colors.cardElevated};
     color: ${({ theme }) => theme.colors.vanilla};
+    border-color: ${({ theme }) => theme.colors.burntCaramel};
   }
 
   @media (max-width: 480px) {
@@ -147,91 +163,136 @@ const SecondaryActionButton = styled.button`
   }
 `;
 
-const CardWrapper = styled.div`
+const ShowcaseWrapper = styled.div`
   position: relative;
   width: 100%;
+  display: flex;
+  justify-content: center;
 `;
 
-const CardGlow = styled.div`
+const ShowcaseGlow = styled.div`
   position: absolute;
-  inset: -8px;
+  inset: -10px;
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  opacity: 0.1;
-  filter: blur(30px);
-  border-radius: 28px;
+  opacity: 0.15;
+  filter: blur(35px);
+  border-radius: 32px;
   z-index: 0;
 `;
 
-const StatusCard = styled.div`
+const ShowcaseCard = styled.div`
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 440px;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: clamp(20px, 4vw, 28px);
-  padding: clamp(20px, 4vw, 32px);
+  border-radius: 24px;
+  padding: clamp(14px, 2vh, 18px);
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  gap: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 `;
 
-const CardHeader = styled.div`
+const DishImageFrame = styled.div`
+  position: relative;
+  width: 100%;
+  height: clamp(160px, 24vh, 220px);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
+const DishImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+`;
+
+const FloatingSpecialTag = styled.div`
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: ${({ theme }) => theme.gradients.caramelMocha};
+  color: ${({ theme }) => theme.colors.vanilla};
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+`;
+
+const ShowcaseFooter = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  padding-bottom: 14px;
+  gap: 10px;
 `;
 
-const MetricsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-
-  @media (min-width: 420px) {
-    grid-template-columns: 1fr 1fr;
-  }
-`;
-
-const MetricTile = styled.div`
-  padding: clamp(12px, 3vw, 16px);
-  border-radius: 14px;
-  background-color: ${({ theme }) => theme.colors.cardElevated};
-  border: 1px solid ${({ theme }) => theme.colors.border};
+const DishMeta = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
 `;
 
-const MetricLabel = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
+const DishTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 900;
+  color: ${({ theme }) => theme.colors.vanilla};
+`;
+
+const DishTagline = styled.span`
+  font-size: 12px;
   color: ${({ theme }) => theme.colors.textMuted};
 `;
 
-const MetricValue = styled.span`
-  font-size: clamp(22px, 4vw, 26px);
+const PricePill = styled.span`
+  font-size: 15px;
   font-weight: 900;
-  color: ${({ $highlight, theme }) => ($highlight ? theme.colors.success : theme.colors.vanilla)};
+  color: ${({ theme }) => theme.colors.latte};
+  background-color: ${({ theme }) => theme.colors.cardElevated};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  padding: 5px 12px;
+  border-radius: 10px;
+  flex-shrink: 0;
 `;
 
-const RefreshBtn = styled.button`
+const TableServiceBar = styled.div`
   background: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 8px;
-  border-radius: 8px;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+`;
+
+const ServiceStatusText = styled.span`
+  font-size: 11px;
+  font-weight: 700;
   color: ${({ theme }) => theme.colors.latte};
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+  gap: 6px;
+`;
 
-  &:hover {
-    color: ${({ theme }) => theme.colors.vanilla};
-  }
+const ServicePulse = styled.span`
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.colors.success};
+  box-shadow: 0 0 8px ${({ theme }) => theme.colors.success};
+`;
+
+const TablesFreeCount = styled.span`
+  font-size: 11px;
+  font-weight: 800;
+  color: ${({ theme }) => theme.colors.vanilla};
 `;
 
 const MobileStickyBar = styled.button`
@@ -264,15 +325,11 @@ function MainDashboard() {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [status, setStatus] = useState(null);
 
-  const fetchStatus = () => {
+  useEffect(() => {
     apiClient
       .get("restaurant/status/")
       .then((res) => setStatus(res.data))
-      .catch((err) => console.error(err));
-  };
-
-  useEffect(() => {
-    fetchStatus();
+      .catch(() => {});
   }, []);
 
   const handleOpenReservation = () => {
@@ -301,71 +358,71 @@ function MainDashboard() {
         onOpenProfile={() => setProfileModalOpen(true)}
       />
 
-      <MainContent>
-        <Grid>
-          <HeroTextContainer>
-            <Badge>Welcome to DineFlow</Badge>
+      <HeroWrapper>
+        <AmbientArtCanvas />
 
-            <Title>
-              Warm Hospitality Meets <GradientText>Artisanal Flavors.</GradientText>
-            </Title>
+        <MainContent>
+          <Grid>
+            <HeroTextContainer>
+              <Badge>
+                Fine Dining & Lounge
+              </Badge>
 
-            <Subtitle>
-              Browse our chef-curated selection, reserve your table with ease, and enjoy a seamless dining experience.
-            </Subtitle>
+              <Title>
+                Exceptional Cuisine, <GradientText>Unforgettable Evenings.</GradientText>
+              </Title>
 
-            <ButtonGroup>
-              <PrimaryActionButton href="#menu">
-                View Menu
-                <ArrowRight size={16} />
-              </PrimaryActionButton>
+              <Subtitle>
+                Experience chef-crafted dishes inspired by genuine culinary heritage. Reserve your table, explore our seasonal tasting menu, and enjoy seamless dining from table to check.
+              </Subtitle>
 
-              <SecondaryActionButton onClick={handleOpenReservation}>
-                <CalendarDays size={16} />
-                Reserve Table
-              </SecondaryActionButton>
-            </ButtonGroup>
-          </HeroTextContainer>
+              <ButtonGroup>
+                <PrimaryActionButton href="#menu">
+                  Explore Menu
+                  <ArrowRight size={15} />
+                </PrimaryActionButton>
 
-          <CardWrapper>
-            <CardGlow />
-            <StatusCard>
-              <CardHeader>
-                <div>
-                  <h3 style={{ fontSize: "16px", fontWeight: 800, color: theme.colors.vanilla }}>
-                    Dining Room Status
-                  </h3>
-                  <p style={{ fontSize: "12px", color: theme.colors.textMuted }}>
-                    Today's dining availability
-                  </p>
-                </div>
+                <SecondaryActionButton onClick={handleOpenReservation}>
+                  <CalendarDays size={15} />
+                  Book Table
+                </SecondaryActionButton>
+              </ButtonGroup>
+            </HeroTextContainer>
 
-                <RefreshBtn onClick={fetchStatus}>
-                  <RefreshCw size={15} />
-                </RefreshBtn>
-              </CardHeader>
+            <ShowcaseWrapper>
+              <ShowcaseGlow />
+              <ShowcaseCard>
+                <DishImageFrame>
+                  <DishImage
+                    src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=80"
+                    alt="Charcoal Grilled Ribeye Special"
+                    loading="lazy"
+                  />
+                  <FloatingSpecialTag>Chef's Signature</FloatingSpecialTag>
+                </DishImageFrame>
 
-              <MetricsGrid>
-                <MetricTile>
-                  <MetricLabel>
-                    <Clock size={13} />
-                    Dining Service
-                  </MetricLabel>
-                  <MetricValue $highlight>{status?.status || "OPEN"}</MetricValue>
-                </MetricTile>
+                <ShowcaseFooter>
+                  <DishMeta>
+                    <DishTitle>Charcoal Grilled Ribeye</DishTitle>
+                    <DishTagline>Aromatic herbs, garlic butter, roasted asparagus</DishTagline>
+                  </DishMeta>
+                  <PricePill>28,000 RWF</PricePill>
+                </ShowcaseFooter>
 
-                <MetricTile>
-                  <MetricLabel>
-                    <ShieldCheck size={13} />
-                    Available Tables
-                  </MetricLabel>
-                  <MetricValue>{status?.available_tables ?? "--"}</MetricValue>
-                </MetricTile>
-              </MetricsGrid>
-            </StatusCard>
-          </CardWrapper>
-        </Grid>
-      </MainContent>
+                <TableServiceBar>
+                  <ServiceStatusText>
+                    <ServicePulse />
+                    {status?.status === "OPEN" ? "Kitchen & Dinner Service Active" : "Service Opens Soon"}
+                  </ServiceStatusText>
+                  <TablesFreeCount>
+                    {status?.available_tables ?? "--"} Tables Available
+                  </TablesFreeCount>
+                </TableServiceBar>
+              </ShowcaseCard>
+            </ShowcaseWrapper>
+          </Grid>
+        </MainContent>
+      </HeroWrapper>
 
       <MenuSection />
 
