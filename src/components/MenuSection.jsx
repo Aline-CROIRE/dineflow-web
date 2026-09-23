@@ -1,603 +1,272 @@
-import React, { useEffect, useState, useRef } from "react";
-import styled from "styled-components";
-import { Search, Plus, Check, ChevronLeft, ChevronRight } from "lucide-react";
-import apiClient from "../api/client";
+import React, { useState } from "react";
+import styled, { keyframes } from "styled-components";
+import { X, Plus, Minus, Check } from "lucide-react";
 import { useCart } from "../context/CartContext";
-import DishDetailModal from "./DishDetailModal";
+import { useAuth } from "../context/AuthContext";
+import { resolveDishImage, FALLBACK_FOOD_IMAGE } from "./MenuSection";
 
-const Section = styled.section`
-  width: 100%;
-  padding: 30px clamp(16px, 4vw, 56px) 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
 `;
 
-const SectionHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-`;
-
-const Tagline = styled.span`
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: ${({ theme }) => theme.colors.burntCaramel};
-`;
-
-const SectionTitle = styled.h2`
-  font-size: clamp(24px, 5vw, 36px);
-  font-weight: 900;
-  letter-spacing: -0.5px;
-  color: ${({ theme }) => theme.colors.vanilla};
-`;
-
-const ControlsBar = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  @media (min-width: 640px) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+const slideUp = keyframes`
+  from { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.97); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
   }
 `;
 
-const SearchWrapper = styled.div`
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-
-  @media (min-width: 640px) {
-    max-width: 360px;
-  }
-`;
-
-const SearchIconWrapper = styled.div`
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: ${({ theme }) => theme.colors.textMuted};
+const Overlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(25, 21, 21, 0.82);
+  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: ${fadeIn} 0.25s ease-out;
+  overflow-y: auto;
 `;
 
-const SearchInput = styled.input`
+const ModalCard = styled.div`
   width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 12px;
-  padding: 12px 14px 12px 42px;
-  font-size: 14px;
-  color: ${({ theme }) => theme.colors.vanilla};
-  transition: all 0.2s ease;
-
-  &::placeholder {
-    color: ${({ theme }) => theme.colors.textMuted};
-  }
-
-  &:focus {
-    border-color: ${({ theme }) => theme.colors.burntCaramel};
-  }
-`;
-
-const SortSelect = styled.select`
-  background-color: ${({ theme }) => theme.colors.card};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-size: 13px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.latte};
-  cursor: pointer;
-  outline: none;
-  width: 100%;
-
-  @media (min-width: 640px) {
-    width: auto;
-  }
-
-  &:focus {
-    border-color: ${({ theme }) => theme.colors.burntCaramel};
-  }
-`;
-
-const CategoryTabsTrack = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  -webkit-overflow-scrolling: touch;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.border};
-    border-radius: 4px;
-  }
-`;
-
-const CategoryChip = styled.button`
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
-  color: ${({ $active, theme }) => ($active ? theme.colors.vanilla : theme.colors.latte)};
-  background: ${({ $active, theme }) =>
-    $active ? theme.gradients.caramelMocha : theme.colors.card};
-  border: 1px solid
-    ${({ $active, theme }) => ($active ? "transparent" : theme.colors.border)};
-  transition: all 0.2s ease;
-
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.burntCaramel};
-  }
-`;
-
-const DishesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: clamp(16px, 2.5vw, 24px);
-`;
-
-const DishCard = styled.div`
-  background-color: ${({ theme }) => theme.colors.card};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 20px;
+  border-radius: 28px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease;
-
-  &:hover {
-    transform: translateY(-3px);
-    border-color: ${({ theme }) => theme.colors.burntCaramel};
-  }
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8);
+  animation: ${slideUp} 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 `;
 
-const CardImageContainer = styled.div`
+const ModalHeroImage = styled.div`
   position: relative;
   width: 100%;
-  height: 190px;
-  overflow: hidden;
+  height: 200px;
   background-color: ${({ theme }) => theme.colors.cardElevated};
 `;
 
-const CardImage = styled.img`
+const Img = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  display: block;
+`;
 
-  ${DishCard}:hover & {
-    transform: scale(1.04);
+const ModalCloseBtn = styled.button`
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background-color: rgba(25, 21, 21, 0.85);
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.vanilla};
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.burntCaramel};
   }
 `;
 
-const CardBody = styled.div`
-  padding: 20px;
+const ModalBody = styled.div`
+  padding: clamp(20px, 4vw, 28px);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  flex: 1;
-  gap: 14px;
+  gap: 18px;
+  overflow-y: auto;
 `;
 
-const DishHeader = styled.div`
+const TitleBlock = styled.div`
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 4px;
 `;
 
-const DishName = styled.h3`
-  font-size: 17px;
+const CategoryPill = styled.span`
+  font-size: 11px;
   font-weight: 800;
-  color: ${({ theme }) => theme.colors.vanilla};
-`;
-
-const CategoryTag = styled.span`
-  font-size: 10px;
-  font-weight: 700;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.latte};
-  background-color: ${({ theme }) => theme.colors.cardElevated};
-  padding: 3px 8px;
-  border-radius: 6px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  flex-shrink: 0;
+  letter-spacing: 1px;
+  color: ${({ theme }) => theme.colors.burntCaramel};
 `;
 
-const DishDescription = styled.p`
-  font-size: 13px;
-  line-height: 1.5;
-  color: ${({ theme }) => theme.colors.textMuted};
-`;
-
-const DishFooter = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 12px;
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
-`;
-
-const Price = styled.span`
-  font-size: 17px;
+const DishTitle = styled.h2`
+  font-size: 22px;
   font-weight: 900;
   color: ${({ theme }) => theme.colors.vanilla};
 `;
 
-const AddButton = styled.button`
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: ${({ $added, theme }) =>
-    $added ? theme.colors.success : theme.gradients.caramelMocha};
+const Description = styled.p`
+  font-size: 14px;
+  line-height: 1.6;
+  color: ${({ theme }) => theme.colors.textMuted};
+`;
+
+const DetailRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background-color: ${({ theme }) => theme.colors.cardElevated};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
+const PriceTag = styled.span`
+  font-size: 20px;
+  font-weight: 900;
   color: ${({ theme }) => theme.colors.vanilla};
+`;
+
+const QuantityPicker = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: ${({ theme }) => theme.colors.background};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 10px;
+  padding: 4px 8px;
+`;
+
+const PickerBtn = styled.button`
+  background: transparent;
+  color: ${({ theme }) => theme.colors.vanilla};
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.15s ease;
+  border-radius: 6px;
 
   &:hover {
-    transform: scale(1.05);
+    background-color: ${({ theme }) => theme.colors.cardElevated};
   }
 `;
 
-const PaginationContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 32px;
-  padding-top: 16px;
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
-`;
-
-const ItemRangeCounter = styled.span`
-  font-size: 12px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.textMuted};
-  letter-spacing: 0.5px;
-`;
-
-const PaginationControls = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-`;
-
-const NavPageBtn = styled.button`
-  padding: 8px 14px;
-  border-radius: 10px;
-  background-color: ${({ theme }) => theme.colors.card};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  color: ${({ theme }) => theme.colors.vanilla};
-  font-size: 12px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-
-  &:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
-  &:hover:not(:disabled) {
-    border-color: ${({ theme }) => theme.colors.burntCaramel};
-    color: ${({ theme }) => theme.colors.latte};
-  }
-`;
-
-const NumberPill = styled.button`
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ $active, theme }) => ($active ? theme.colors.vanilla : theme.colors.latte)};
-  background: ${({ $active, theme }) =>
-    $active ? theme.gradients.caramelMocha : theme.colors.card};
-  border: 1px solid
-    ${({ $active, theme }) => ($active ? "transparent" : theme.colors.border)};
-  box-shadow: ${({ $active }) =>
-    $active ? "0 4px 12px rgba(123, 75, 58, 0.4)" : "none"};
-  transition: all 0.2s;
-
-  &:hover:not(:disabled) {
-    border-color: ${({ theme }) => theme.colors.burntCaramel};
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 60px 20px;
-  color: ${({ theme }) => theme.colors.textMuted};
+const PickerValue = styled.span`
   font-size: 14px;
+  font-weight: 800;
+  min-width: 18px;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.vanilla};
 `;
 
-export const FALLBACK_FOOD_IMAGE =
-  "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80";
+const ActionBtn = styled.button`
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  color: ${({ theme }) => theme.colors.vanilla};
+  background: ${({ $added, theme }) =>
+    $added ? theme.colors.success : theme.gradients.caramelMocha};
+  box-shadow: 0 8px 20px rgba(123, 75, 58, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
 
-export function resolveDishImage(name = "") {
-  const n = name.toLowerCase();
+  &:hover {
+    transform: translateY(-1px);
+  }
+`;
 
-  if (n.includes("rice") || n.includes("pilau") || n.includes("biryani")) {
-    return "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("wing") || n.includes("chicken")) {
-    return "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("steak") || n.includes("beef") || n.includes("ribeye") || n.includes("meat") || n.includes("lamb") || n.includes("chop")) {
-    return "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("pizza") || n.includes("margherita") || n.includes("calzone")) {
-    return "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("salmon") || n.includes("fish") || n.includes("prawn") || n.includes("seafood") || n.includes("sambaza") || n.includes("tilapia")) {
-    return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("burger") || n.includes("cheeseburger") || n.includes("sandwich")) {
-    return "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("pasta") || n.includes("carbonara") || n.includes("spaghetti") || n.includes("penne") || n.includes("lasagna")) {
-    return "https://images.unsplash.com/photo-1621996346565-e3d5d62810f4?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("salad") || n.includes("caesar") || n.includes("green") || n.includes("avocado")) {
-    return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("bread") || n.includes("bruschetta") || n.includes("garlic") || n.includes("toast")) {
-    return "https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("fries") || n.includes("chips")) {
-    return "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("juice") || n.includes("water") || n.includes("orange") || n.includes("drink") || n.includes("smoothie") || n.includes("cocktail")) {
-    return "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("coffee") || n.includes("latte") || n.includes("espresso") || n.includes("cappuccino") || n.includes("tea")) {
-    return "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=600&q=80";
-  }
-  if (n.includes("dessert") || n.includes("cake") || n.includes("chocolate") || n.includes("ice cream") || n.includes("pie")) {
-    return "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80";
-  }
-
-  return FALLBACK_FOOD_IMAGE;
-}
-
-export default function MenuSection({ refreshTrigger }) {
+export default function DishDetailModal({ dish, isOpen, onClose, onRequireAuth }) {
+  const { user } = useAuth();
   const { addItem } = useCart();
-  const sectionRef = useRef(null);
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
 
-  const [categories, setCategories] = useState([]);
-  const [items, setItems] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [ordering, setOrdering] = useState("name");
-  const [addedItemIds, setAddedItemIds] = useState({});
-  const [selectedDishModal, setSelectedDishModal] = useState(null);
+  if (!isOpen || !dish) return null;
 
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-
-  useEffect(() => {
-    apiClient
-      .get("restaurant/categories/")
-      .then((res) => setCategories(res.data.results || res.data || []))
-      .catch(() => setCategories([]));
-  }, []);
-
-  useEffect(() => {
-    let url = `restaurant/menu-items/?ordering=${ordering}&page=${page}`;
-    if (searchQuery.trim()) {
-      url += `&search=${encodeURIComponent(searchQuery)}`;
-    }
-    if (selectedCategory !== "ALL") {
-      url += `&category=${selectedCategory}`;
+  const handleAddToCart = () => {
+    if (!user) {
+      onClose();
+      if (onRequireAuth) onRequireAuth();
+      return;
     }
 
-    apiClient
-      .get(url)
-      .then((res) => {
-        const results = res.data.results || res.data || [];
-        setItems(results);
-        const count = res.data.count || results.length;
-        setTotalCount(count);
-        setTotalPages(Math.ceil(count / 10) || 1);
-      })
-      .catch(() => {
-        setItems([]);
-        setTotalCount(0);
-        setTotalPages(1);
-      });
-  }, [selectedCategory, searchQuery, ordering, page, refreshTrigger]);
-
-  const changePage = (newPage) => {
-    setPage(newPage);
-    if (sectionRef.current) {
-      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    for (let i = 0; i < quantity; i++) {
+      addItem(dish);
     }
-  };
-
-  const handleCategoryChange = (catId) => {
-    setSelectedCategory(catId);
-    setPage(1);
-  };
-
-  const handleSearchChange = (val) => {
-    setSearchQuery(val);
-    setPage(1);
-  };
-
-  const handleDirectAdd = (e, dish) => {
-    e.stopPropagation();
-    addItem(dish);
-    setAddedItemIds((prev) => ({ ...prev, [dish.id]: true }));
-
+    setAdded(true);
     setTimeout(() => {
-      setAddedItemIds((prev) => ({ ...prev, [dish.id]: false }));
-    }, 900);
+      setAdded(false);
+      onClose();
+    }, 800);
   };
 
-  const formatRWF = (amount) => {
-    const numeric = Math.round(parseFloat(amount) || 0);
-    return `${numeric.toLocaleString()} RWF`;
-  };
-
-  const startItemIndex = totalCount === 0 ? 0 : (page - 1) * 10 + 1;
-  const endItemIndex = Math.min(page * 10, totalCount);
+  const unitPrice = Math.round(parseFloat(dish.price) || 0);
+  const totalPrice = unitPrice * quantity;
 
   return (
-    <Section id="menu" ref={sectionRef}>
-      <SectionHeader>
-        <Tagline>Chef's Kitchen</Tagline>
-        <SectionTitle>Our Menu</SectionTitle>
-      </SectionHeader>
-
-      <ControlsBar>
-        <SearchWrapper>
-          <SearchIconWrapper>
-            <Search size={16} />
-          </SearchIconWrapper>
-          <SearchInput
-            placeholder="Search dishes..."
-            value={searchQuery}
-            onChange={(e) => handleSearchChange(e.target.value)}
+    <Overlay onClick={onClose}>
+      <ModalCard onClick={(e) => e.stopPropagation()}>
+        <ModalHeroImage>
+          <Img
+            src={resolveDishImage(dish.name)}
+            alt={dish.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = FALLBACK_FOOD_IMAGE;
+            }}
           />
-        </SearchWrapper>
+          <ModalCloseBtn onClick={onClose}>
+            <X size={18} />
+          </ModalCloseBtn>
+        </ModalHeroImage>
 
-        <SortSelect value={ordering} onChange={(e) => setOrdering(e.target.value)}>
-          <option value="name">Sort by: Name (A-Z)</option>
-          <option value="price">Sort by: Price (Low to High)</option>
-          <option value="-price">Sort by: Price (High to Low)</option>
-        </SortSelect>
-      </ControlsBar>
+        <ModalBody>
+          <TitleBlock>
+            <CategoryPill>{dish.category_name || "Chef's Special"}</CategoryPill>
+            <DishTitle>{dish.name}</DishTitle>
+          </TitleBlock>
 
-      <CategoryTabsTrack>
-        <CategoryChip
-          $active={selectedCategory === "ALL"}
-          onClick={() => handleCategoryChange("ALL")}
-        >
-          All Items
-        </CategoryChip>
-        {categories.map((cat) => (
-          <CategoryChip
-            key={cat.id}
-            $active={selectedCategory === cat.id.toString()}
-            onClick={() => handleCategoryChange(cat.id.toString())}
-          >
-            {cat.name}
-          </CategoryChip>
-        ))}
-      </CategoryTabsTrack>
+          <Description>
+            {dish.description || "Prepared with fresh ingredients by our culinary team."}
+          </Description>
 
-      {items.length === 0 ? (
-        <EmptyState>No dishes match your selection.</EmptyState>
-      ) : (
-        <>
-          <DishesGrid>
-            {items.map((dish) => (
-              <DishCard key={dish.id} onClick={() => setSelectedDishModal(dish)}>
-                <CardImageContainer>
-                  <CardImage
-                    src={resolveDishImage(dish.name)}
-                    alt={dish.name}
-                    loading="lazy"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = FALLBACK_FOOD_IMAGE;
-                    }}
-                  />
-                </CardImageContainer>
+          <DetailRow>
+            <PriceTag>{totalPrice.toLocaleString()} RWF</PriceTag>
 
-                <CardBody>
-                  <div>
-                    <DishHeader>
-                      <DishName>{dish.name}</DishName>
-                      <CategoryTag>{dish.category_name || "Special"}</CategoryTag>
-                    </DishHeader>
-                    <DishDescription>
-                      {dish.description || "Prepared freshly upon order."}
-                    </DishDescription>
-                  </div>
+            <QuantityPicker>
+              <PickerBtn onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+                <Minus size={13} />
+              </PickerBtn>
+              <PickerValue>{quantity}</PickerValue>
+              <PickerBtn onClick={() => setQuantity(quantity + 1)}>
+                <Plus size={13} />
+              </PickerBtn>
+            </QuantityPicker>
+          </DetailRow>
 
-                  <DishFooter>
-                    <Price>{formatRWF(dish.price)}</Price>
-                    <AddButton
-                      $added={addedItemIds[dish.id]}
-                      onClick={(e) => handleDirectAdd(e, dish)}
-                      aria-label="Add to order"
-                    >
-                      {addedItemIds[dish.id] ? <Check size={18} /> : <Plus size={18} />}
-                    </AddButton>
-                  </DishFooter>
-                </CardBody>
-              </DishCard>
-            ))}
-          </DishesGrid>
-
-          {totalPages > 1 && (
-            <PaginationContainer>
-              <ItemRangeCounter>
-                Showing {startItemIndex}–{endItemIndex} of {totalCount} culinary creations
-              </ItemRangeCounter>
-
-              <PaginationControls>
-                <NavPageBtn
-                  disabled={page <= 1}
-                  onClick={() => changePage(Math.max(1, page - 1))}
-                >
-                  <ChevronLeft size={16} /> Previous
-                </NavPageBtn>
-
-                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pNum) => (
-                  <NumberPill
-                    key={pNum}
-                    $active={page === pNum}
-                    onClick={() => changePage(pNum)}
-                  >
-                    {pNum}
-                  </NumberPill>
-                ))}
-
-                <NavPageBtn
-                  disabled={page >= totalPages}
-                  onClick={() => changePage(Math.min(totalPages, page + 1))}
-                >
-                  Next <ChevronRight size={16} />
-                </NavPageBtn>
-              </PaginationControls>
-            </PaginationContainer>
-          )}
-        </>
-      )}
-
-      <DishDetailModal
-        dish={selectedDishModal}
-        isOpen={Boolean(selectedDishModal)}
-        onClose={() => setSelectedDishModal(null)}
-      />
-    </Section>
+          <ActionBtn $added={added} onClick={handleAddToCart}>
+            {added ? (
+              <>
+                <Check size={17} />
+                Added to Order
+              </>
+            ) : (
+              `Add to Dining Order • ${totalPrice.toLocaleString()} RWF`
+            )}
+          </ActionBtn>
+        </ModalBody>
+      </ModalCard>
+    </Overlay>
   );
 }

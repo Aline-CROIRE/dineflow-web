@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { X, Plus, Minus, Check } from "lucide-react";
 import { useCart } from "../context/CartContext";
-import { resolveDishImage } from "./MenuSection";
+import { useAuth } from "../context/AuthContext";
+import { resolveDishImage, FALLBACK_FOOD_IMAGE } from "./MenuSection";
 
 const fadeIn = keyframes`
   from { opacity: 0; }
@@ -185,7 +186,8 @@ const ActionBtn = styled.button`
   }
 `;
 
-export default function DishDetailModal({ dish, isOpen, onClose }) {
+export default function DishDetailModal({ dish, isOpen, onClose, onRequireAuth }) {
+  const { user } = useAuth();
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
@@ -193,6 +195,12 @@ export default function DishDetailModal({ dish, isOpen, onClose }) {
   if (!isOpen || !dish) return null;
 
   const handleAddToCart = () => {
+    if (!user) {
+      onClose();
+      if (onRequireAuth) onRequireAuth();
+      return;
+    }
+
     for (let i = 0; i < quantity; i++) {
       addItem(dish);
     }
@@ -210,7 +218,14 @@ export default function DishDetailModal({ dish, isOpen, onClose }) {
     <Overlay onClick={onClose}>
       <ModalCard onClick={(e) => e.stopPropagation()}>
         <ModalHeroImage>
-          <Img src={resolveDishImage(dish.name)} alt={dish.name} />
+          <Img
+            src={resolveDishImage(dish.name)}
+            alt={dish.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = FALLBACK_FOOD_IMAGE;
+            }}
+          />
           <ModalCloseBtn onClick={onClose}>
             <X size={18} />
           </ModalCloseBtn>

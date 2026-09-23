@@ -362,6 +362,7 @@ function MainDashboard() {
           <Grid>
             <HeroTextContainer>
               <Badge>
+                <Sparkles size={12} />
                 Artisanal Kitchen & Lounge
               </Badge>
 
@@ -421,7 +422,10 @@ function MainDashboard() {
         </MainContent>
       </HeroWrapper>
 
-      <MenuSection refreshTrigger={menuRefreshTrigger} />
+      <MenuSection
+        refreshTrigger={menuRefreshTrigger}
+        onRequireAuth={() => setAuthModalOpen(true)}
+      />
 
       {totalItemsCount > 0 && (
         <MobileStickyBar onClick={() => setIsDrawerOpen(true)}>
