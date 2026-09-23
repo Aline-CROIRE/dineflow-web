@@ -9,6 +9,7 @@ import AuthModal from "./components/AuthModal";
 import ReservationModal from "./components/ReservationModal";
 import CartDrawer from "./components/CartDrawer";
 import OrdersModal from "./components/OrdersModal";
+import StaffDashboardModal from "./components/StaffDashboardModal";
 import MenuSection from "./components/MenuSection";
 import apiClient from "./api/client";
 import { ArrowRight, CalendarDays, Clock, ShieldCheck, RefreshCw } from "lucide-react";
@@ -227,6 +228,7 @@ function MainDashboard() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [reservationModalOpen, setReservationModalOpen] = useState(false);
   const [ordersModalOpen, setOrdersModalOpen] = useState(false);
+  const [staffModalOpen, setStaffModalOpen] = useState(false);
   const [status, setStatus] = useState(null);
 
   const fetchStatus = () => {
@@ -262,6 +264,7 @@ function MainDashboard() {
         onOpenAuth={() => setAuthModalOpen(true)}
         onOpenReservation={handleOpenReservation}
         onOpenOrders={handleOpenOrders}
+        onOpenStaff={() => setStaffModalOpen(true)}
       />
 
       <MainContent>
@@ -339,6 +342,7 @@ function MainDashboard() {
       />
       <CartDrawer onRequireAuth={() => setAuthModalOpen(true)} />
       <OrdersModal isOpen={ordersModalOpen} onClose={() => setOrdersModalOpen(false)} />
+      <StaffDashboardModal isOpen={staffModalOpen} onClose={() => setStaffModalOpen(false)} />
     </AppContainer>
   );
 }

@@ -142,6 +142,22 @@ const CartBadge = styled.span`
   justify-content: center;
 `;
 
+const StaffBadge = styled.button`
+  background: ${({ theme }) => theme.colors.cardElevated};
+  border: 1px solid ${({ theme }) => theme.colors.burntCaramel};
+  color: ${({ theme }) => theme.colors.latte};
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 10px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.card};
+    color: ${({ theme }) => theme.colors.vanilla};
+  }
+`;
+
 const UserBadge = styled.div`
   display: flex;
   align-items: center;
@@ -222,10 +238,17 @@ const MobileMenuButton = styled.button`
   }
 `;
 
-export default function Navbar({ onOpenAuth, onOpenReservation, onOpenOrders }) {
+export default function Navbar({
+  onOpenAuth,
+  onOpenReservation,
+  onOpenOrders,
+  onOpenStaff,
+}) {
   const { user, logout } = useAuth();
   const { totalItemsCount, setIsDrawerOpen } = useCart();
   const [isOpen, setIsOpen] = useState(false);
+
+  const isStaffOrAdmin = user && (user.role === "STAFF" || user.role === "ADMIN");
 
   return (
     <Header>
@@ -244,6 +267,9 @@ export default function Navbar({ onOpenAuth, onOpenReservation, onOpenOrders }) 
           <NavLink href="#menu">Menu</NavLink>
           <NavButton onClick={onOpenReservation}>Reservations</NavButton>
           {user && <NavButton onClick={onOpenOrders}>My Orders</NavButton>}
+          {isStaffOrAdmin && (
+            <StaffBadge onClick={onOpenStaff}>Operations</StaffBadge>
+          )}
         </NavLinks>
 
         <RightCluster>
