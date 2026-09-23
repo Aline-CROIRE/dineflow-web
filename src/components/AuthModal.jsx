@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import styled, { keyframes } from "styled-components";
-import { X, Eye, EyeOff, Check } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import apiClient from "../api/client";
 
@@ -217,10 +217,6 @@ const SubmitBtn = styled.button`
     background: ${({ theme }) => theme.gradients.caramelMochaHover};
     transform: translateY(-2px);
   }
-
-  &:active:not(:disabled) {
-    transform: scale(0.98);
-  }
 `;
 
 const ErrorBox = styled.div`
@@ -335,7 +331,13 @@ export default function AuthModal({ isOpen, onClose }) {
       await login(formData.username, formData.password);
       onClose();
     } catch (err) {
-      setError(err.response?.data?.detail || "Invalid username or password.");
+      if (err.response?.data?.needs_verification) {
+        setRegisteredEmail(err.response.data.email);
+        setStep("verify");
+        setNotification("Please enter the 6-digit code sent to your email.");
+      } else {
+        setError(err.response?.data?.detail || "Invalid username or password.");
+      }
     } finally {
       setLoading(false);
     }

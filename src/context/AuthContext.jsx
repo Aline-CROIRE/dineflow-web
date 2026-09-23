@@ -33,6 +33,10 @@ export function AuthProvider({ children }) {
     setUser(data.user);
   };
 
+  const updateUser = (updatedFields) => {
+    setUser((prev) => ({ ...prev, ...updatedFields }));
+  };
+
   const login = async (username, password) => {
     const response = await apiClient.post("auth/login/", { username, password });
     setAuthData(response.data);
@@ -59,6 +63,7 @@ export function AuthProvider({ children }) {
         register,
         logout,
         setAuthData,
+        updateUser,
         fetchProfile,
       }}
     >

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
-import { X, ChevronRight, Check, Trash2, Plus } from "lucide-react";
+import { X, ChevronRight, Check, Trash2, Plus, UserPlus } from "lucide-react";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
@@ -36,7 +36,7 @@ const Overlay = styled.div`
 
 const ModalCard = styled.div`
   width: 100%;
-  max-width: 880px;
+  max-width: 900px;
   max-height: 90vh;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -120,35 +120,6 @@ const ContentArea = styled.div`
   gap: 16px;
   max-height: 500px;
   overflow-y: auto;
-`;
-
-const MetricsContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-`;
-
-const MetricTile = styled.div`
-  background-color: ${({ theme }) => theme.colors.cardElevated};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 18px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-`;
-
-const MetricLabel = styled.span`
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.latte};
-`;
-
-const MetricValue = styled.span`
-  font-size: 26px;
-  font-weight: 900;
-  color: ${({ theme }) => theme.colors.vanilla};
 `;
 
 const ActionHeader = styled.div`
@@ -332,15 +303,39 @@ const AdvanceBtn = styled.button`
   }
 `;
 
-const UserRow = styled.div`
+const UserCard = styled.div`
   background-color: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 14px;
-  padding: 14px 18px;
+  border-radius: 16px;
+  padding: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
+`;
+
+const UserDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const UserControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const RoleSelect = styled.select`
+  background-color: ${({ theme }) => theme.colors.background};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.vanilla};
+  outline: none;
 `;
 
 export default function StaffDashboardModal({ isOpen, onClose, onMenuUpdated }) {
@@ -356,6 +351,7 @@ export default function StaffDashboardModal({ isOpen, onClose, onMenuUpdated }) 
 
   const [showAddTable, setShowAddTable] = useState(false);
   const [showAddDish, setShowAddDish] = useState(false);
+  const [showAddUser, setShowAddUser] = useState(false);
 
   const [tableForm, setTableForm] = useState({
     table_number: "",
@@ -368,6 +364,14 @@ export default function StaffDashboardModal({ isOpen, onClose, onMenuUpdated }) 
     price: "",
     category: "",
     description: "",
+  });
+
+  const [userForm, setUserForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    role: "STAFF",
+    phone_number: "",
   });
 
   const fetchAllMenuItems = async () => {
@@ -508,9 +512,47 @@ export default function StaffDashboardModal({ isOpen, onClose, onMenuUpdated }) 
     }
   };
 
-  const handlePromoteUser = async (userId, newRole) => {
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    try {
+      await apiClient.post("auth/users/", {
+        username: userForm.username,
+        email: userForm.email,
+        password: userForm.password,
+        role: userForm.role,
+        phone_number: userForm.phone_number,
+        is_email_verified: true,
+        is_active: true,
+      });
+      setShowAddUser(false);
+      setUserForm({ username: "", email: "", password: "", role: "STAFF", phone_number: "" });
+      fetchAllData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleChangeUserRole = async (userId, newRole) => {
     try {
       await apiClient.patch(`auth/users/${userId}/`, { role: newRole });
+      fetchAllData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggleUserActive = async (userId, currentActive) => {
+    try {
+      await apiClient.patch(`auth/users/${userId}/`, { is_active: !currentActive });
+      fetchAllData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      await apiClient.delete(`auth/users/${userId}/`);
       fetchAllData();
     } catch (err) {
       console.error(err);
@@ -523,7 +565,7 @@ export default function StaffDashboardModal({ isOpen, onClose, onMenuUpdated }) 
         <HeaderRow>
           <TitleBlock>
             <Title>Restaurant Operations</Title>
-            <Subtitle>Live auto-sync enabled (10s refresh).</Subtitle>
+            <Subtitle>Kitchen progression, table floor, culinary catalog, and user administration.</Subtitle>
           </TitleBlock>
           <CloseBtn onClick={onClose}>
             <X size={18} />
@@ -767,46 +809,137 @@ export default function StaffDashboardModal({ isOpen, onClose, onMenuUpdated }) 
           )}
 
           {tab === "metrics" && (
-            <MetricsContainer>
-              <MetricTile>
-                <MetricLabel>Total Revenue</MetricLabel>
-                <MetricValue>{Math.round(parseFloat(metrics?.total_revenue || 0)).toLocaleString()} RWF</MetricValue>
-              </MetricTile>
-
-              <MetricTile>
-                <MetricLabel>Active Kitchen Orders</MetricLabel>
-                <MetricValue>{metrics?.active_orders ?? "--"}</MetricValue>
-              </MetricTile>
-
-              <MetricTile>
-                <MetricLabel>Total Reservations</MetricLabel>
-                <MetricValue>{metrics?.total_reservations ?? "--"}</MetricValue>
-              </MetricTile>
-            </MetricsContainer>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+              <div style={{ background: "#241E1E", border: "1px solid #3B3131", borderRadius: "18px", padding: "20px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 800, textTransform: "uppercase", color: "#E7C6A1" }}>Total Revenue</span>
+                <span style={{ fontSize: "26px", fontWeight: 900, color: "#FFF0DC" }}>{Math.round(parseFloat(metrics?.total_revenue || 0)).toLocaleString()} RWF</span>
+              </div>
+              <div style={{ background: "#241E1E", border: "1px solid #3B3131", borderRadius: "18px", padding: "20px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 800, textTransform: "uppercase", color: "#E7C6A1" }}>Active Kitchen Orders</span>
+                <span style={{ fontSize: "26px", fontWeight: 900, color: "#FFF0DC" }}>{metrics?.active_orders ?? "--"}</span>
+              </div>
+              <div style={{ background: "#241E1E", border: "1px solid #3B3131", borderRadius: "18px", padding: "20px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 800, textTransform: "uppercase", color: "#E7C6A1" }}>Total Reservations</span>
+                <span style={{ fontSize: "26px", fontWeight: 900, color: "#FFF0DC" }}>{metrics?.total_reservations ?? "--"}</span>
+              </div>
+            </div>
           )}
 
           {tab === "users" && (
-            usersList.map((u) => (
-              <UserRow key={u.id}>
-                <div>
-                  <span style={{ fontSize: "14px", fontWeight: 800, color: "#FFF0DC", display: "block" }}>
-                    {u.username} ({u.email})
-                  </span>
-                  <span style={{ fontSize: "11px", color: "#9E867E" }}>Role: {u.role}</span>
-                </div>
+            <>
+              <ActionHeader>
+                <SectionSubhead>User Directory ({usersList.length} Accounts)</SectionSubhead>
+                <ToggleFormBtn onClick={() => setShowAddUser(!showAddUser)}>
+                  <UserPlus size={14} /> Add User
+                </ToggleFormBtn>
+              </ActionHeader>
 
-                {u.role === "CUSTOMER" && (
-                  <ToggleFormBtn onClick={() => handlePromoteUser(u.id, "STAFF")}>
-                    Promote to Staff
-                  </ToggleFormBtn>
-                )}
-                {u.role === "STAFF" && (
-                  <ToggleFormBtn onClick={() => handlePromoteUser(u.id, "ADMIN")}>
-                    Promote to Admin
-                  </ToggleFormBtn>
-                )}
-              </UserRow>
-            ))
+              {showAddUser && (
+                <FormBox onSubmit={handleCreateUser}>
+                  <FormRow>
+                    <Field>
+                      <Label>Username</Label>
+                      <Input
+                        placeholder="e.g. john_staff"
+                        value={userForm.username}
+                        onChange={(e) => setUserForm({ ...userForm, username: e.target.value })}
+                        required
+                      />
+                    </Field>
+                    <Field>
+                      <Label>Email</Label>
+                      <Input
+                        type="email"
+                        placeholder="john@example.com"
+                        value={userForm.email}
+                        onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                        required
+                      />
+                    </Field>
+                    <Field>
+                      <Label>Password</Label>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        value={userForm.password}
+                        onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                        required
+                      />
+                    </Field>
+                  </FormRow>
+
+                  <FormRow>
+                    <Field>
+                      <Label>Role</Label>
+                      <Select
+                        value={userForm.role}
+                        onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
+                      >
+                        <option value="CUSTOMER">Customer</option>
+                        <option value="STAFF">Staff</option>
+                        <option value="ADMIN">Admin</option>
+                      </Select>
+                    </Field>
+                    <Field>
+                      <Label>Phone Number</Label>
+                      <Input
+                        placeholder="+250 ..."
+                        value={userForm.phone_number}
+                        onChange={(e) => setUserForm({ ...userForm, phone_number: e.target.value })}
+                      />
+                    </Field>
+                  </FormRow>
+                  <SubmitBtn type="submit">Create User Account</SubmitBtn>
+                </FormBox>
+              )}
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {usersList.map((u) => (
+                  <UserCard key={u.id}>
+                    <UserDetails>
+                      <span style={{ fontSize: "14px", fontWeight: 800, color: "#FFF0DC" }}>
+                        {u.username} ({u.email})
+                      </span>
+                      <span style={{ fontSize: "12px", color: "#9E867E" }}>
+                        Status: {u.is_active ? "Active" : "Deactivated"} • {u.is_email_verified ? "Verified" : "Unverified"}
+                      </span>
+                    </UserDetails>
+
+                    <UserControls>
+                      <RoleSelect
+                        value={u.role}
+                        onChange={(e) => handleChangeUserRole(u.id, e.target.value)}
+                      >
+                        <option value="CUSTOMER">Customer</option>
+                        <option value="STAFF">Staff</option>
+                        <option value="ADMIN">Admin</option>
+                      </RoleSelect>
+
+                      <button
+                        onClick={() => handleToggleUserActive(u.id, u.is_active)}
+                        style={{
+                          background: "transparent",
+                          border: "1px solid #3B3131",
+                          color: u.is_active ? "#E7C6A1" : "#52B788",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          padding: "6px 10px",
+                          borderRadius: "8px",
+                        }}
+                      >
+                        {u.is_active ? "Deactivate" : "Activate"}
+                      </button>
+
+                      {u.id !== user.id && (
+                        <DeleteBtn onClick={() => handleDeleteUser(u.id)} title="Delete User">
+                          <Trash2 size={16} />
+                        </DeleteBtn>
+                      )}
+                    </UserControls>
+                  </UserCard>
+                ))}
+              </div>
+            </>
           )}
         </ContentArea>
       </ModalCard>

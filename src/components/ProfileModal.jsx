@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { X } from "lucide-react";
 import apiClient from "../api/client";
@@ -149,10 +149,11 @@ const Message = styled.div`
 `;
 
 export default function ProfileModal({ isOpen, onClose }) {
-  const { user, fetchProfile } = useAuth();
+  const { user, updateUser, fetchProfile } = useAuth();
   const [tab, setTab] = useState("profile");
-  const [phone, setPhone] = useState(user?.phone_number || "");
-  const [firstName, setFirstName] = useState(user?.first_name || "");
+  const [phone, setPhone] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [msg, setMsg] = useState(null);
   const [isError, setIsError] = useState(false);
 
@@ -162,18 +163,28 @@ export default function ProfileModal({ isOpen, onClose }) {
     new_password_confirm: "",
   });
 
+  useEffect(() => {
+    if (user) {
+      setPhone(user.phone_number || "");
+      setFirstName(user.first_name || "");
+      setLastName(user.last_name || "");
+    }
+  }, [user, isOpen]);
+
   if (!isOpen || !user) return null;
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setMsg(null);
     try {
-      await apiClient.patch("auth/profile/", {
+      const response = await apiClient.patch("auth/profile/", {
         phone_number: phone,
         first_name: firstName,
+        last_name: lastName,
       });
       setIsError(false);
-      setMsg("Profile updated.");
+      setMsg("Profile updated successfully.");
+      updateUser(response.data);
       fetchProfile();
     } catch {
       setIsError(true);
@@ -240,7 +251,16 @@ export default function ProfileModal({ isOpen, onClose }) {
               <Input
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Your name"
+                placeholder="e.g. Alice"
+              />
+            </Field>
+
+            <Field>
+              <Label>Last Name</Label>
+              <Input
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="e.g. Smith"
               />
             </Field>
 
