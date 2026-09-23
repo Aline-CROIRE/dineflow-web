@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { UtensilsCrossed, LogIn, LogOut, Menu, X, ShoppingBag } from "lucide-react";
-import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
@@ -164,10 +163,12 @@ const UserBadge = styled.div`
   gap: 10px;
 `;
 
-const UserInfo = styled.div`
+const UserClickArea = styled.button`
+  background: transparent;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  cursor: pointer;
 `;
 
 const Username = styled.span`
@@ -243,6 +244,7 @@ export default function Navbar({
   onOpenReservation,
   onOpenOrders,
   onOpenStaff,
+  onOpenProfile,
 }) {
   const { user, logout } = useAuth();
   const { totalItemsCount, setIsDrawerOpen } = useCart();
@@ -280,10 +282,10 @@ export default function Navbar({
 
           {user ? (
             <UserBadge>
-              <UserInfo>
+              <UserClickArea onClick={onOpenProfile} title="Account Settings">
                 <Username>{user.username}</Username>
                 <RoleTag>{user.role}</RoleTag>
-              </UserInfo>
+              </UserClickArea>
               <LogoutButton onClick={logout} title="Sign Out">
                 <LogOut size={16} />
               </LogoutButton>
