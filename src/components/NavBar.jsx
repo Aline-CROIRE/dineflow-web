@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { UtensilsCrossed, LogIn, Menu, X } from "lucide-react";
+import { UtensilsCrossed, LogIn, LogOut, Menu, X } from "lucide-react";
 import apiClient from "../api/client";
+import { useAuth } from "../context/AuthContext";
 
 const Header = styled.header`
   position: sticky;
@@ -103,9 +104,6 @@ const StatusDot = styled.span`
   border-radius: 50%;
   background-color: ${({ $isOpen, theme }) =>
     $isOpen ? theme.colors.success : theme.colors.danger};
-  box-shadow: 0 0 8px
-    ${({ $isOpen, theme }) =>
-      $isOpen ? theme.colors.success : theme.colors.danger};
 `;
 
 const StatusText = styled.span`
@@ -114,11 +112,36 @@ const StatusText = styled.span`
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
-const PrimaryButton = styled.button`
+const UserBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+`;
+
+const Username = styled.span`
+  font-size: 14px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.vanilla};
+`;
+
+const RoleTag = styled.span`
+  font-size: 10px;
+  font-weight: 800;
+  color: ${({ theme }) => theme.colors.latte};
+  letter-spacing: 0.5px;
+`;
+
+const ActionButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 22px;
+  padding: 10px 20px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 700;
@@ -132,12 +155,25 @@ const PrimaryButton = styled.button`
     transform: translateY(-1px);
   }
 
-  &:active {
-    transform: scale(0.97);
-  }
-
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: none;
+  }
+`;
+
+const LogoutButton = styled.button`
+  background: ${({ theme }) => theme.colors.card};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.latte};
+  padding: 8px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.vanilla};
+    border-color: ${({ theme }) => theme.colors.burntCaramel};
   }
 `;
 
@@ -169,7 +205,8 @@ const MobileDrawer = styled.div`
   }
 `;
 
-export default function Navbar() {
+export default function Navbar({ onOpenAuth }) {
+  const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [systemStatus, setSystemStatus] = useState("CHECKING");
 
@@ -204,10 +241,22 @@ export default function Navbar() {
           </StatusBadge>
         </NavLinks>
 
-        <PrimaryButton>
-          <LogIn size={16} />
-          Sign In
-        </PrimaryButton>
+        {user ? (
+          <UserBadge>
+            <UserInfo>
+              <Username>{user.username}</Username>
+              <RoleTag>{user.role}</RoleTag>
+            </UserInfo>
+            <LogoutButton onClick={logout} title="Sign Out">
+              <LogOut size={16} />
+            </LogoutButton>
+          </UserBadge>
+        ) : (
+          <ActionButton onClick={onOpenAuth}>
+            <LogIn size={16} />
+            Sign In
+          </ActionButton>
+        )}
 
         <MobileMenuButton onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -225,6 +274,21 @@ export default function Navbar() {
           <NavLink href="#orders" onClick={() => setIsOpen(false)}>
             My Orders
           </NavLink>
+          {user ? (
+            <button
+              onClick={() => { logout(); setIsOpen(false); }}
+              style={{ padding: "12px", background: "transparent", color: "#E7C6A1", textAlign: "left" }}
+            >
+              Sign Out ({user.username})
+            </button>
+          ) : (
+            <button
+              onClick={() => { onOpenAuth(); setIsOpen(false); }}
+              style={{ padding: "12px", background: "#7B4B3A", color: "#FFF0DC", borderRadius: "10px" }}
+            >
+              Sign In
+            </button>
+          )}
         </MobileDrawer>
       )}
     </Header>

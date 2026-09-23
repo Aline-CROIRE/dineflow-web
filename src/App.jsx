@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { theme } from "./theme/theme";
 import { GlobalStyles } from "./theme/GlobalStyles";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/NavBar";
+import AuthModal from "./components/AuthModel";
 import apiClient from "./api/client";
-import { Sparkles, ArrowRight, CalendarDays, Clock, ShieldCheck, RefreshCw } from "lucide-react";
+import { ArrowRight, CalendarDays, Clock, ShieldCheck, RefreshCw } from "lucide-react";
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -114,10 +116,6 @@ const PrimaryActionButton = styled.button`
     background: ${({ theme }) => theme.gradients.caramelMochaHover};
     transform: translateY(-2px);
   }
-
-  &:active {
-    transform: scale(0.98);
-  }
 `;
 
 const SecondaryActionButton = styled.button`
@@ -220,17 +218,16 @@ const RefreshBtn = styled.button`
   }
 `;
 
-export default function App() {
+function MainDashboard() {
+  const { user } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [status, setStatus] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   const fetchStatus = () => {
-    setLoading(true);
     apiClient
       .get("restaurant/status/")
       .then((res) => setStatus(res.data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+      .catch((err) => console.error(err));
   };
 
   useEffect(() => {
@@ -238,80 +235,87 @@ export default function App() {
   }, []);
 
   return (
+    <AppContainer>
+      <Navbar onOpenAuth={() => setAuthModalOpen(true)} />
+
+      <MainContent>
+        <Grid>
+          <HeroTextContainer>
+            <Badge>Artisanal Bistro Experience</Badge>
+
+            <Title>
+              Culinary Warmth Meets <GradientText>Modern Service.</GradientText>
+            </Title>
+
+            <Subtitle>
+              Explore our chef-crafted recipes, reserve your dining table effortlessly, and settle checks seamlessly from your table.
+            </Subtitle>
+
+            <ButtonGroup>
+              <PrimaryActionButton>
+                Explore Menu
+                <ArrowRight size={18} />
+              </PrimaryActionButton>
+
+              <SecondaryActionButton onClick={() => (!user ? setAuthModalOpen(true) : null)}>
+                <CalendarDays size={18} />
+                Book Table
+              </SecondaryActionButton>
+            </ButtonGroup>
+          </HeroTextContainer>
+
+          <CardWrapper>
+            <CardGlow />
+            <StatusCard>
+              <CardHeader>
+                <div>
+                  <h3 style={{ fontSize: "18px", fontWeight: 800, color: theme.colors.vanilla }}>
+                    Live Dining Floor
+                  </h3>
+                  <p style={{ fontSize: "12px", color: theme.colors.textMuted }}>
+                    Connected to Neon PostgreSQL Backend
+                  </p>
+                </div>
+
+                <RefreshBtn onClick={fetchStatus}>
+                  <RefreshCw size={16} />
+                </RefreshBtn>
+              </CardHeader>
+
+              <MetricsGrid>
+                <MetricTile>
+                  <MetricLabel>
+                    <Clock size={14} />
+                    Kitchen Status
+                  </MetricLabel>
+                  <MetricValue $highlight>{status?.status || "OPEN"}</MetricValue>
+                </MetricTile>
+
+                <MetricTile>
+                  <MetricLabel>
+                    <ShieldCheck size={14} />
+                    Free Tables
+                  </MetricLabel>
+                  <MetricValue>{status?.available_tables ?? "--"}</MetricValue>
+                </MetricTile>
+              </MetricsGrid>
+            </StatusCard>
+          </CardWrapper>
+        </Grid>
+      </MainContent>
+
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+    </AppContainer>
+  );
+}
+
+export default function App() {
+  return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <AppContainer>
-        <Navbar />
-
-        <MainContent>
-          <Grid>
-            <HeroTextContainer>
-              <Badge>
-                <Sparkles size={14} />
-                Artisanal Bistro Experience
-              </Badge>
-
-              <Title>
-                Culinary Warmth Meets <GradientText>Modern Service.</GradientText>
-              </Title>
-
-              <Subtitle>
-                Explore our chef-crafted recipes, reserve your dining table effortlessly, and settle checks seamlessly from your table.
-              </Subtitle>
-
-              <ButtonGroup>
-                <PrimaryActionButton>
-                  Explore Menu
-                  <ArrowRight size={18} />
-                </PrimaryActionButton>
-
-                <SecondaryActionButton>
-                  <CalendarDays size={18} color={theme.colors.latte} />
-                  Book Table
-                </SecondaryActionButton>
-              </ButtonGroup>
-            </HeroTextContainer>
-
-            <CardWrapper>
-              <CardGlow />
-              <StatusCard>
-                <CardHeader>
-                  <div>
-                    <h3 style={{ fontSize: "18px", fontWeight: 800, color: theme.colors.vanilla }}>
-                      Live Dining Floor
-                    </h3>
-                    <p style={{ fontSize: "12px", color: theme.colors.textMuted }}>
-                      Connected to Neon PostgreSQL Backend
-                    </p>
-                  </div>
-
-                  <RefreshBtn onClick={fetchStatus}>
-                    <RefreshCw size={16} />
-                  </RefreshBtn>
-                </CardHeader>
-
-                <MetricsGrid>
-                  <MetricTile>
-                    <MetricLabel>
-                      <Clock size={14} color={theme.colors.latte} />
-                      Kitchen Status
-                    </MetricLabel>
-                    <MetricValue $highlight>{status?.status || "OPEN"}</MetricValue>
-                  </MetricTile>
-
-                  <MetricTile>
-                    <MetricLabel>
-                      <ShieldCheck size={14} color={theme.colors.burntCaramel} />
-                      Free Tables
-                    </MetricLabel>
-                    <MetricValue>{status?.available_tables ?? "--"}</MetricValue>
-                  </MetricTile>
-                </MetricsGrid>
-              </StatusCard>
-            </CardWrapper>
-          </Grid>
-        </MainContent>
-      </AppContainer>
+      <AuthProvider>
+        <MainDashboard />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
