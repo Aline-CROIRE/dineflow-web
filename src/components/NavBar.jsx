@@ -146,7 +146,6 @@ const CartBadge = styled.span`
 `;
 
 const StaffBadge = styled.button`
-  display: none;
   background: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.burntCaramel};
   color: ${({ theme }) => theme.colors.latte};
@@ -159,10 +158,6 @@ const StaffBadge = styled.button`
   &:hover {
     background: ${({ theme }) => theme.colors.card};
     color: ${({ theme }) => theme.colors.vanilla};
-  }
-
-  @media (min-width: 480px) {
-    display: inline-block;
   }
 `;
 
@@ -319,10 +314,6 @@ export default function Navbar({
             <ShoppingBag size={18} />
             {totalItemsCount > 0 && <CartBadge>{totalItemsCount}</CartBadge>}
           </CartButton>
-
-          {isStaffOrAdmin && (
-            <StaffBadge onClick={onOpenStaff}>Operations</StaffBadge>
-          )}
 
           {user ? (
             <UserBadge>

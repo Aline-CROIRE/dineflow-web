@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Search, Plus, Check } from "lucide-react";
+import { Search, Plus, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import apiClient from "../api/client";
 import { useCart } from "../context/CartContext";
 import DishDetailModal from "./DishDetailModal";
@@ -256,6 +256,44 @@ const AddButton = styled.button`
   }
 `;
 
+const PaginationBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+`;
+
+const PageBtn = styled.button`
+  padding: 8px 16px;
+  border-radius: 10px;
+  background-color: ${({ theme }) => theme.colors.card};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.vanilla};
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: ${({ theme }) => theme.colors.burntCaramel};
+    color: ${({ theme }) => theme.colors.latte};
+  }
+`;
+
+const PageIndicator = styled.span`
+  font-size: 13px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.textMuted};
+`;
+
 const EmptyState = styled.div`
   text-align: center;
   padding: 60px 20px;
@@ -312,7 +350,7 @@ export function resolveDishImage(name = "") {
   return FALLBACK_FOOD_IMAGE;
 }
 
-export default function MenuSection() {
+export default function MenuSection({ refreshTrigger }) {
   const { addItem } = useCart();
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
@@ -322,6 +360,10 @@ export default function MenuSection() {
   const [addedItemIds, setAddedItemIds] = useState({});
   const [selectedDishModal, setSelectedDishModal] = useState(null);
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
   useEffect(() => {
     apiClient
       .get("restaurant/categories/")
@@ -330,7 +372,7 @@ export default function MenuSection() {
   }, []);
 
   useEffect(() => {
-    let url = `restaurant/menu-items/?ordering=${ordering}`;
+    let url = `restaurant/menu-items/?ordering=${ordering}&page=${page}`;
     if (searchQuery.trim()) {
       url += `&search=${encodeURIComponent(searchQuery)}`;
     }
@@ -340,9 +382,28 @@ export default function MenuSection() {
 
     apiClient
       .get(url)
-      .then((res) => setItems(res.data.results || res.data || []))
-      .catch(() => setItems([]));
-  }, [selectedCategory, searchQuery, ordering]);
+      .then((res) => {
+        const results = res.data.results || res.data || [];
+        setItems(results);
+        setTotalCount(res.data.count || results.length);
+        setTotalPages(Math.ceil((res.data.count || results.length) / 10) || 1);
+      })
+      .catch(() => {
+        setItems([]);
+        setTotalCount(0);
+        setTotalPages(1);
+      });
+  }, [selectedCategory, searchQuery, ordering, page, refreshTrigger]);
+
+  const handleCategoryChange = (catId) => {
+    setSelectedCategory(catId);
+    setPage(1);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
+    setPage(1);
+  };
 
   const handleDirectAdd = (e, dish) => {
     e.stopPropagation();
@@ -374,7 +435,7 @@ export default function MenuSection() {
           <SearchInput
             placeholder="Search dishes..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
         </SearchWrapper>
 
@@ -388,7 +449,7 @@ export default function MenuSection() {
       <CategoryTabsTrack>
         <CategoryChip
           $active={selectedCategory === "ALL"}
-          onClick={() => setSelectedCategory("ALL")}
+          onClick={() => handleCategoryChange("ALL")}
         >
           All Items
         </CategoryChip>
@@ -396,7 +457,7 @@ export default function MenuSection() {
           <CategoryChip
             key={cat.id}
             $active={selectedCategory === cat.id.toString()}
-            onClick={() => setSelectedCategory(cat.id.toString())}
+            onClick={() => handleCategoryChange(cat.id.toString())}
           >
             {cat.name}
           </CategoryChip>
@@ -406,46 +467,70 @@ export default function MenuSection() {
       {items.length === 0 ? (
         <EmptyState>No dishes match your selection.</EmptyState>
       ) : (
-        <DishesGrid>
-          {items.map((dish) => (
-            <DishCard key={dish.id} onClick={() => setSelectedDishModal(dish)}>
-              <CardImageContainer>
-                <CardImage
-                  src={resolveDishImage(dish.name)}
-                  alt={dish.name}
-                  loading="lazy"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = FALLBACK_FOOD_IMAGE;
-                  }}
-                />
-              </CardImageContainer>
+        <>
+          <DishesGrid>
+            {items.map((dish) => (
+              <DishCard key={dish.id} onClick={() => setSelectedDishModal(dish)}>
+                <CardImageContainer>
+                  <CardImage
+                    src={resolveDishImage(dish.name)}
+                    alt={dish.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = FALLBACK_FOOD_IMAGE;
+                    }}
+                  />
+                </CardImageContainer>
 
-              <CardBody>
-                <div>
-                  <DishHeader>
-                    <DishName>{dish.name}</DishName>
-                    <CategoryTag>{dish.category_name || "Special"}</CategoryTag>
-                  </DishHeader>
-                  <DishDescription>
-                    {dish.description || "Prepared freshly upon order."}
-                  </DishDescription>
-                </div>
+                <CardBody>
+                  <div>
+                    <DishHeader>
+                      <DishName>{dish.name}</DishName>
+                      <CategoryTag>{dish.category_name || "Special"}</CategoryTag>
+                    </DishHeader>
+                    <DishDescription>
+                      {dish.description || "Prepared freshly upon order."}
+                    </DishDescription>
+                  </div>
 
-                <DishFooter>
-                  <Price>{formatRWF(dish.price)}</Price>
-                  <AddButton
-                    $added={addedItemIds[dish.id]}
-                    onClick={(e) => handleDirectAdd(e, dish)}
-                    aria-label="Add to order"
-                  >
-                    {addedItemIds[dish.id] ? <Check size={18} /> : <Plus size={18} />}
-                  </AddButton>
-                </DishFooter>
-              </CardBody>
-            </DishCard>
-          ))}
-        </DishesGrid>
+                  <DishFooter>
+                    <Price>{formatRWF(dish.price)}</Price>
+                    <AddButton
+                      $added={addedItemIds[dish.id]}
+                      onClick={(e) => handleDirectAdd(e, dish)}
+                      aria-label="Add to order"
+                    >
+                      {addedItemIds[dish.id] ? <Check size={18} /> : <Plus size={18} />}
+                    </AddButton>
+                  </DishFooter>
+                </CardBody>
+              </DishCard>
+            ))}
+          </DishesGrid>
+
+          {totalPages > 1 && (
+            <PaginationBar>
+              <PageBtn
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                <ChevronLeft size={16} /> Previous
+              </PageBtn>
+
+              <PageIndicator>
+                Page {page} of {totalPages} ({totalCount} items)
+              </PageIndicator>
+
+              <PageBtn
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >
+                Next <ChevronRight size={16} />
+              </PageBtn>
+            </PaginationBar>
+          )}
+        </>
       )}
 
       <DishDetailModal

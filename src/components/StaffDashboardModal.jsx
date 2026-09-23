@@ -343,7 +343,7 @@ const UserRow = styled.div`
   gap: 12px;
 `;
 
-export default function StaffDashboardModal({ isOpen, onClose }) {
+export default function StaffDashboardModal({ isOpen, onClose, onMenuUpdated }) {
   const { user } = useAuth();
   const [tab, setTab] = useState("orders");
   const [metrics, setMetrics] = useState(null);
@@ -465,6 +465,7 @@ export default function StaffDashboardModal({ isOpen, onClose }) {
       setShowAddDish(false);
       setDishForm({ name: "", price: "", category: categories[0]?.id || "", description: "" });
       fetchAllData();
+      if (onMenuUpdated) onMenuUpdated();
     } catch (err) {
       console.error(err);
     }
@@ -474,6 +475,7 @@ export default function StaffDashboardModal({ isOpen, onClose }) {
     try {
       await apiClient.delete(`restaurant/menu-items/${dishId}/`);
       fetchAllData();
+      if (onMenuUpdated) onMenuUpdated();
     } catch (err) {
       console.error(err);
     }

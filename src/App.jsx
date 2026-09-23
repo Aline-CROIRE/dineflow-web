@@ -349,6 +349,7 @@ function MainDashboard() {
   const [staffModalOpen, setStaffModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [status, setStatus] = useState(null);
+  const [menuRefreshTrigger, setMenuRefreshTrigger] = useState(0);
 
   useEffect(() => {
     apiClient
@@ -458,7 +459,7 @@ function MainDashboard() {
         </MainContent>
       </HeroWrapper>
 
-      <MenuSection />
+      <MenuSection refreshTrigger={menuRefreshTrigger} />
 
       {totalItemsCount > 0 && (
         <MobileStickyBar onClick={() => setIsDrawerOpen(true)}>
@@ -477,7 +478,11 @@ function MainDashboard() {
       />
       <CartDrawer onRequireAuth={() => setAuthModalOpen(true)} />
       <OrdersModal isOpen={ordersModalOpen} onClose={() => setOrdersModalOpen(false)} />
-      <StaffDashboardModal isOpen={staffModalOpen} onClose={() => setStaffModalOpen(false)} />
+      <StaffDashboardModal
+        isOpen={staffModalOpen}
+        onClose={() => setStaffModalOpen(false)}
+        onMenuUpdated={() => setMenuRefreshTrigger((p) => p + 1)}
+      />
       <ProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
     </AppContainer>
   );
