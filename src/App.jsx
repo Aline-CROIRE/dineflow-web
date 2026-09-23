@@ -3,7 +3,7 @@ import styled, { ThemeProvider } from "styled-components";
 import { theme } from "./theme/theme";
 import { GlobalStyles } from "./theme/GlobalStyles";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { CartProvider } from "./context/CartContext";
+import { CartProvider, useCart } from "./context/CartContext";
 import Navbar from "./components/Navbar";
 import AuthModal from "./components/AuthModal";
 import ReservationModal from "./components/ReservationModal";
@@ -13,7 +13,7 @@ import StaffDashboardModal from "./components/StaffDashboardModal";
 import ProfileModal from "./components/ProfileModal";
 import MenuSection from "./components/MenuSection";
 import apiClient from "./api/client";
-import { ArrowRight, CalendarDays, Clock, ShieldCheck, RefreshCw } from "lucide-react";
+import { ArrowRight, CalendarDays, Clock, ShieldCheck, RefreshCw, ShoppingBag } from "lucide-react";
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -224,8 +224,29 @@ const RefreshBtn = styled.button`
   }
 `;
 
+const MobileStickyBar = styled.button`
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 90;
+  background: ${({ theme }) => theme.gradients.caramelMocha};
+  color: ${({ theme }) => theme.colors.vanilla};
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
+  }
+`;
+
 function MainDashboard() {
   const { user } = useAuth();
+  const { totalItemsCount, totalAmountRWF, setIsDrawerOpen } = useCart();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [reservationModalOpen, setReservationModalOpen] = useState(false);
   const [ordersModalOpen, setOrdersModalOpen] = useState(false);
@@ -337,6 +358,16 @@ function MainDashboard() {
       </MainContent>
 
       <MenuSection />
+
+      {totalItemsCount > 0 && (
+        <MobileStickyBar onClick={() => setIsDrawerOpen(true)}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <ShoppingBag size={18} />
+            <span style={{ fontWeight: 800, fontSize: "14px" }}>{totalItemsCount} Dishes</span>
+          </div>
+          <span style={{ fontWeight: 900, fontSize: "15px" }}>{totalAmountRWF.toLocaleString()} RWF →</span>
+        </MobileStickyBar>
+      )}
 
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
       <ReservationModal

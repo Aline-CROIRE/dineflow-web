@@ -36,10 +36,15 @@ const Drawer = styled.aside`
   flex-direction: column;
   box-shadow: -20px 0 40px rgba(0, 0, 0, 0.7);
   animation: ${slideIn} 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    max-width: 100%;
+    border-left: none;
+  }
 `;
 
 const DrawerHeader = styled.div`
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   display: flex;
   align-items: center;
@@ -47,7 +52,7 @@ const DrawerHeader = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 20px;
+  font-size: clamp(18px, 4vw, 20px);
   font-weight: 800;
   color: ${({ theme }) => theme.colors.vanilla};
 `;
@@ -71,17 +76,17 @@ const CloseBtn = styled.button`
 const ItemsList = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding: 20px 24px;
+  padding: clamp(16px, 3vw, 24px);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 `;
 
 const ItemRow = styled.div`
   background-color: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 16px;
-  padding: 16px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -141,12 +146,12 @@ const QtyValue = styled.span`
 `;
 
 const DrawerFooter = styled.div`
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
   border-top: 1px solid ${({ theme }) => theme.colors.border};
   background-color: ${({ theme }) => theme.colors.background};
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 `;
 
 const FieldGroup = styled.div`
@@ -180,10 +185,11 @@ const PaymentMethodGrid = styled.div`
 `;
 
 const MethodBtn = styled.button`
-  padding: 10px;
+  padding: 10px 6px;
   border-radius: 10px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
+  text-align: center;
   color: ${({ $active, theme }) => ($active ? theme.colors.vanilla : theme.colors.textMuted)};
   background-color: ${({ $active, theme }) => ($active ? theme.colors.cardElevated : theme.colors.card)};
   border: 1px solid
