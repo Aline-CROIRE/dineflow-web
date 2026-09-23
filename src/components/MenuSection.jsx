@@ -6,10 +6,8 @@ import { useCart } from "../context/CartContext";
 import DishDetailModal from "./DishDetailModal";
 
 const Section = styled.section`
-  max-width: 1600px;
   width: 100%;
-  margin: 0 auto;
-  padding: 30px clamp(16px, 4vw, 48px) 80px;
+  padding: 30px clamp(16px, 4vw, 56px) 80px;
   display: flex;
   flex-direction: column;
   gap: 24px;

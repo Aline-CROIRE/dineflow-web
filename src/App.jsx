@@ -18,6 +18,7 @@ import { ArrowRight, CalendarDays, ShoppingBag, Sparkles } from "lucide-react";
 
 const AppContainer = styled.div`
   min-height: 100vh;
+  width: 100%;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -38,10 +39,8 @@ const HeroWrapper = styled.div`
 const MainContent = styled.main`
   position: relative;
   z-index: 1;
-  max-width: 1600px;
   width: 100%;
-  margin: 0 auto;
-  padding: clamp(20px, 3vh, 36px) clamp(16px, 4vw, 48px);
+  padding: clamp(20px, 3vh, 36px) clamp(16px, 4vw, 56px);
   display: flex;
   align-items: center;
 `;
@@ -49,7 +48,7 @@ const MainContent = styled.main`
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(24px, 4vw, 48px);
+  gap: clamp(28px, 4vw, 56px);
   align-items: center;
   width: 100%;
 
@@ -61,7 +60,7 @@ const Grid = styled.div`
 const HeroTextContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: clamp(12px, 2vh, 18px);
+  gap: clamp(14px, 2vh, 20px);
 `;
 
 const Badge = styled.div`
@@ -81,9 +80,9 @@ const Badge = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: clamp(28px, 3.8vw, 48px);
+  font-size: clamp(30px, 4.2vw, 56px);
   font-weight: 900;
-  line-height: 1.15;
+  line-height: 1.12;
   letter-spacing: -0.5px;
   color: ${({ theme }) => theme.colors.vanilla};
   word-break: break-word;
@@ -96,17 +95,17 @@ const GradientText = styled.span`
 `;
 
 const Subtitle = styled.p`
-  font-size: clamp(13px, 1.4vw, 16px);
+  font-size: clamp(14px, 1.5vw, 17px);
   color: ${({ theme }) => theme.colors.textMuted};
   line-height: 1.6;
-  max-width: 580px;
+  max-width: 640px;
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 4px;
+  gap: 14px;
+  margin-top: 6px;
 
   @media (max-width: 480px) {
     flex-direction: column;
@@ -119,13 +118,13 @@ const PrimaryActionButton = styled.a`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: clamp(12px, 1.8vh, 14px) clamp(20px, 3vw, 26px);
-  border-radius: 12px;
-  font-size: 14px;
+  padding: clamp(12px, 1.8vh, 16px) clamp(22px, 3vw, 30px);
+  border-radius: 14px;
+  font-size: 15px;
   font-weight: 800;
   color: ${({ theme }) => theme.colors.vanilla};
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  box-shadow: 0 8px 20px rgba(123, 75, 58, 0.35);
+  box-shadow: 0 8px 22px rgba(123, 75, 58, 0.4);
   transition: all 0.2s ease;
 
   &:hover {
@@ -143,9 +142,9 @@ const SecondaryActionButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: clamp(12px, 1.8vh, 14px) clamp(18px, 3vw, 24px);
-  border-radius: 12px;
-  font-size: 14px;
+  padding: clamp(12px, 1.8vh, 16px) clamp(20px, 3vw, 26px);
+  border-radius: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.latte};
   background-color: ${({ theme }) => theme.colors.card};
@@ -174,7 +173,7 @@ const ShowcaseGlow = styled.div`
   position: absolute;
   inset: -10px;
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  opacity: 0.15;
+  opacity: 0.16;
   filter: blur(35px);
   border-radius: 32px;
   z-index: 0;
@@ -184,22 +183,22 @@ const ShowcaseCard = styled.div`
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 500px;
+  max-width: 540px;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 24px;
-  padding: clamp(14px, 2vh, 18px);
+  border-radius: 26px;
+  padding: clamp(16px, 2.5vh, 22px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 `;
 
 const DishImageFrame = styled.div`
   position: relative;
   width: 100%;
-  height: clamp(160px, 24vh, 230px);
-  border-radius: 16px;
+  height: clamp(170px, 26vh, 240px);
+  border-radius: 18px;
   overflow: hidden;
   border: 1px solid ${({ theme }) => theme.colors.border};
 `;
@@ -217,7 +216,7 @@ const FloatingSpecialTag = styled.div`
   left: 12px;
   background: ${({ theme }) => theme.gradients.caramelMocha};
   color: ${({ theme }) => theme.colors.vanilla};
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 999px;
   font-size: 10px;
   font-weight: 800;
@@ -230,7 +229,7 @@ const ShowcaseFooter = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 `;
 
 const DishMeta = styled.div`
@@ -240,7 +239,7 @@ const DishMeta = styled.div`
 `;
 
 const DishTitle = styled.h3`
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 900;
   color: ${({ theme }) => theme.colors.vanilla};
 `;
@@ -251,13 +250,13 @@ const DishTagline = styled.span`
 `;
 
 const PricePill = styled.span`
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 900;
   color: ${({ theme }) => theme.colors.latte};
   background-color: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 5px 12px;
-  border-radius: 10px;
+  padding: 6px 14px;
+  border-radius: 12px;
   flex-shrink: 0;
 `;
 
@@ -265,7 +264,7 @@ const TableServiceBar = styled.div`
   background: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 12px;
-  padding: 10px 14px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -8,17 +8,16 @@ const Header = styled.header`
   position: sticky;
   top: 0;
   z-index: 50;
+  width: 100%;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  background-color: rgba(25, 21, 21, 0.9);
+  background-color: rgba(25, 21, 21, 0.92);
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
 const Container = styled.div`
-  max-width: 1600px;
   width: 100%;
-  margin: 0 auto;
-  padding: 0 clamp(16px, 4vw, 48px);
+  padding: 0 clamp(16px, 4vw, 56px);
   height: clamp(68px, 8vw, 80px);
   display: flex;
   align-items: center;
@@ -29,15 +28,15 @@ const Container = styled.div`
 const LogoWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   flex-shrink: 0;
 `;
 
 const LogoBadge = styled.div`
-  width: clamp(36px, 5vw, 42px);
-  height: clamp(36px, 5vw, 42px);
-  border-radius: 10px;
+  width: clamp(38px, 5vw, 44px);
+  height: clamp(38px, 5vw, 44px);
+  border-radius: 12px;
   background: ${({ theme }) => theme.gradients.caramelMocha};
   display: flex;
   align-items: center;
@@ -51,7 +50,7 @@ const BrandText = styled.div`
 `;
 
 const BrandTitle = styled.span`
-  font-size: clamp(18px, 4vw, 22px);
+  font-size: clamp(20px, 4vw, 24px);
   font-weight: 900;
   letter-spacing: 1px;
   background: ${({ theme }) => theme.gradients.accentGradient};
@@ -74,7 +73,7 @@ const BrandSubtitle = styled.span`
 const NavLinks = styled.nav`
   display: none;
   align-items: center;
-  gap: 28px;
+  gap: 32px;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
     display: flex;
@@ -109,7 +108,7 @@ const NavButton = styled.button`
 const RightCluster = styled.div`
   display: flex;
   align-items: center;
-  gap: clamp(8px, 2vw, 14px);
+  gap: clamp(10px, 2vw, 16px);
   flex-shrink: 0;
 `;
 
@@ -118,8 +117,8 @@ const CartButton = styled.button`
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.vanilla};
-  padding: 8px;
-  border-radius: 10px;
+  padding: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,10 +150,10 @@ const StaffBadge = styled.button`
   background: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.burntCaramel};
   color: ${({ theme }) => theme.colors.latte};
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
   transition: all 0.2s;
 
   &:hover {
@@ -170,7 +169,7 @@ const StaffBadge = styled.button`
 const UserBadge = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 `;
 
 const UserClickArea = styled.button`
@@ -182,10 +181,10 @@ const UserClickArea = styled.button`
 `;
 
 const Username = styled.span`
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.vanilla};
-  max-width: 100px;
+  max-width: 110px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -205,14 +204,14 @@ const RoleTag = styled.span`
 const ActionButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-size: 13px;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.vanilla};
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  box-shadow: 0 4px 14px rgba(123, 75, 58, 0.3);
+  box-shadow: 0 6px 16px rgba(123, 75, 58, 0.3);
   transition: all 0.2s ease;
 
   &:hover {
@@ -225,7 +224,7 @@ const LogoutButton = styled.button`
   border: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.latte};
   padding: 8px;
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -243,8 +242,8 @@ const MobileMenuButton = styled.button`
   justify-content: center;
   background: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 8px;
-  padding: 7px;
+  border-radius: 10px;
+  padding: 8px;
   color: ${({ theme }) => theme.colors.vanilla};
 
   @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
@@ -298,7 +297,7 @@ export default function Navbar({
       <Container>
         <LogoWrapper>
           <LogoBadge>
-            <UtensilsCrossed size={18} color="#FFF0DC" />
+            <UtensilsCrossed size={20} color="#FFF0DC" />
           </LogoBadge>
           <BrandText>
             <BrandTitle>DINEFLOW</BrandTitle>
@@ -317,7 +316,7 @@ export default function Navbar({
 
         <RightCluster>
           <CartButton onClick={() => setIsDrawerOpen(true)} title="View Order">
-            <ShoppingBag size={17} />
+            <ShoppingBag size={18} />
             {totalItemsCount > 0 && <CartBadge>{totalItemsCount}</CartBadge>}
           </CartButton>
 
@@ -332,12 +331,12 @@ export default function Navbar({
                 <RoleTag>{user.role}</RoleTag>
               </UserClickArea>
               <LogoutButton onClick={logout} title="Sign Out">
-                <LogOut size={15} />
+                <LogOut size={16} />
               </LogoutButton>
             </UserBadge>
           ) : (
             <ActionButton onClick={onOpenAuth}>
-              <LogIn size={15} />
+              <LogIn size={16} />
               Sign In
             </ActionButton>
           )}
@@ -403,7 +402,7 @@ export default function Navbar({
                 onOpenAuth();
               }}
             >
-              <LogIn size={15} />
+              <LogIn size={16} />
               Sign In
             </ActionButton>
           )}
