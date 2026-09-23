@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import styled, { keyframes } from "styled-components";
-import { X, Eye, EyeOff } from "lucide-react";
+import { X, Eye, EyeOff, Check } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import apiClient from "../api/client";
 
 const fadeIn = keyframes`
   from { opacity: 0; }
@@ -84,6 +85,7 @@ const Title = styled.h2`
 const Subtitle = styled.p`
   font-size: 13px;
   color: ${({ theme }) => theme.colors.textMuted};
+  line-height: 1.45;
 `;
 
 const CloseBtn = styled.button`
@@ -214,7 +216,6 @@ const SubmitBtn = styled.button`
   &:hover:not(:disabled) {
     background: ${({ theme }) => theme.gradients.caramelMochaHover};
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(123, 75, 58, 0.5);
   }
 
   &:active:not(:disabled) {
@@ -231,6 +232,16 @@ const ErrorBox = styled.div`
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
+`;
+
+const SuccessNotification = styled.div`
+  padding: 12px 16px;
+  border-radius: 12px;
+  background-color: rgba(82, 183, 136, 0.15);
+  border: 1px solid ${({ theme }) => theme.colors.success};
+  color: ${({ theme }) => theme.colors.vanilla};
+  font-size: 13px;
+  font-weight: 600;
 `;
 
 const ToggleText = styled.div`
@@ -253,14 +264,53 @@ const ToggleLink = styled.button`
   }
 `;
 
+const OtpGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+`;
+
+const OtpBox = styled.input`
+  width: 100%;
+  height: 52px;
+  background-color: ${({ theme }) => theme.colors.cardElevated};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 900;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.vanilla};
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.burntCaramel};
+    box-shadow: 0 0 0 3px rgba(201, 124, 93, 0.2);
+    background-color: #2D2424;
+  }
+`;
+
+const ResendSection = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+`;
+
 export default function AuthModal({ isOpen, onClose }) {
-  const { login, register } = useAuth();
+  const { login, register, setAuthData } = useAuth();
   const [tab, setTab] = useState("login");
+  const [step, setStep] = useState("form");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [registeredEmail, setRegisteredEmail] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const inputRefs = useRef([]);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -310,8 +360,10 @@ export default function AuthModal({ isOpen, onClose }) {
         password: formData.password,
         password_confirm: formData.password_confirm,
       });
-      await login(formData.username, formData.password);
-      onClose();
+
+      setRegisteredEmail(formData.email);
+      setStep("verify");
+      setNotification(`Verification code sent to ${formData.email}. Please check your inbox.`);
     } catch (err) {
       const msg =
         err.response?.data?.password?.[0] ||
@@ -324,14 +376,95 @@ export default function AuthModal({ isOpen, onClose }) {
     }
   };
 
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+    setError(null);
+
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim();
+    if (/^\d{6}$/.test(pastedData)) {
+      const digits = pastedData.split("");
+      setOtp(digits);
+      inputRefs.current[5]?.focus();
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    const fullCode = otp.join("");
+    if (fullCode.length !== 6) {
+      setError("Please enter the complete 6-digit code.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.post("auth/verify-email/", {
+        email: registeredEmail,
+        code: fullCode,
+      });
+
+      setAuthData(response.data);
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.code?.[0] || err.response?.data?.detail || "Invalid code.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setError(null);
+    setNotification(null);
+    try {
+      await apiClient.post("auth/resend-verification/", { email: registeredEmail });
+      setNotification("A fresh 6-digit verification code has been sent to your inbox.");
+    } catch (err) {
+      setError(err.response?.data?.email?.[0] || "Could not resend code.");
+    }
+  };
+
+  const resetState = () => {
+    setStep("form");
+    setError(null);
+    setNotification(null);
+    setOtp(["", "", "", "", "", ""]);
+  };
+
   return (
     <Overlay onClick={onClose}>
       <ModalCard onClick={(e) => e.stopPropagation()}>
         <HeaderRow>
           <TitleBlock>
-            <Title>{tab === "login" ? "Sign In" : "Register"}</Title>
+            <Title>
+              {step === "verify"
+                ? "Verify Email"
+                : tab === "login"
+                ? "Sign In"
+                : "Register"}
+            </Title>
             <Subtitle>
-              {tab === "login"
+              {step === "verify"
+                ? `Enter the 6-digit code sent to ${registeredEmail}`
+                : tab === "login"
                 ? "Access your reservations, orders, and table checks."
                 : "Create an account for contactless ordering and bookings."}
             </Subtitle>
@@ -341,32 +474,67 @@ export default function AuthModal({ isOpen, onClose }) {
           </CloseBtn>
         </HeaderRow>
 
-        <TabTrack>
-          <TabButton
-            type="button"
-            $active={tab === "login"}
-            onClick={() => {
-              setTab("login");
-              setError(null);
-            }}
-          >
-            Existing Customer
-          </TabButton>
-          <TabButton
-            type="button"
-            $active={tab === "register"}
-            onClick={() => {
-              setTab("register");
-              setError(null);
-            }}
-          >
-            New Account
-          </TabButton>
-        </TabTrack>
+        {step === "form" && (
+          <TabTrack>
+            <TabButton
+              type="button"
+              $active={tab === "login"}
+              onClick={() => {
+                setTab("login");
+                setError(null);
+              }}
+            >
+              Existing Customer
+            </TabButton>
+            <TabButton
+              type="button"
+              $active={tab === "register"}
+              onClick={() => {
+                setTab("register");
+                setError(null);
+              }}
+            >
+              New Account
+            </TabButton>
+          </TabTrack>
+        )}
 
+        {notification && <SuccessNotification>{notification}</SuccessNotification>}
         {error && <ErrorBox>{error}</ErrorBox>}
 
-        {tab === "login" ? (
+        {step === "verify" ? (
+          <Form onSubmit={handleVerifyOtp}>
+            <OtpGrid onPaste={handleOtpPaste}>
+              {otp.map((digit, idx) => (
+                <OtpBox
+                  key={idx}
+                  ref={(el) => (inputRefs.current[idx] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(idx, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                  autoFocus={idx === 0}
+                  required
+                />
+              ))}
+            </OtpGrid>
+
+            <SubmitBtn type="submit" disabled={loading || otp.join("").length < 6}>
+              {loading ? "Verifying Code..." : "Verify & Sign In"}
+            </SubmitBtn>
+
+            <ResendSection>
+              <ToggleLink type="button" onClick={handleResend}>
+                Resend code
+              </ToggleLink>
+              <ToggleLink type="button" onClick={resetState}>
+                Back to registration
+              </ToggleLink>
+            </ResendSection>
+          </Form>
+        ) : tab === "login" ? (
           <Form onSubmit={handleLogin}>
             <FieldGroup>
               <Label htmlFor="username">Username</Label>
@@ -451,7 +619,7 @@ export default function AuthModal({ isOpen, onClose }) {
               <Input
                 id="reg-phone"
                 name="phone_number"
-                placeholder="+1 234 567 8900"
+                placeholder="+250 ..."
                 value={formData.phone_number}
                 onChange={handleChange}
               />
