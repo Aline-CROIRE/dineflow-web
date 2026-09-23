@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import { Search, Plus, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import apiClient from "../api/client";
@@ -256,21 +256,39 @@ const AddButton = styled.button`
   }
 `;
 
-const PaginationBar = styled.div`
+const PaginationContainer = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-top: 24px;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
-const PageBtn = styled.button`
-  padding: 8px 16px;
+const ItemRangeCounter = styled.span`
+  font-size: 12px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.textMuted};
+  letter-spacing: 0.5px;
+`;
+
+const PaginationControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
+
+const NavPageBtn = styled.button`
+  padding: 8px 14px;
   border-radius: 10px;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.vanilla};
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -278,7 +296,7 @@ const PageBtn = styled.button`
   transition: all 0.2s;
 
   &:disabled {
-    opacity: 0.4;
+    opacity: 0.35;
     cursor: not-allowed;
   }
 
@@ -288,10 +306,27 @@ const PageBtn = styled.button`
   }
 `;
 
-const PageIndicator = styled.span`
+const NumberPill = styled.button`
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   font-size: 13px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.textMuted};
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ $active, theme }) => ($active ? theme.colors.vanilla : theme.colors.latte)};
+  background: ${({ $active, theme }) =>
+    $active ? theme.gradients.caramelMocha : theme.colors.card};
+  border: 1px solid
+    ${({ $active, theme }) => ($active ? "transparent" : theme.colors.border)};
+  box-shadow: ${({ $active }) =>
+    $active ? "0 4px 12px rgba(123, 75, 58, 0.4)" : "none"};
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    border-color: ${({ theme }) => theme.colors.burntCaramel};
+  }
 `;
 
 const EmptyState = styled.div`
@@ -352,6 +387,8 @@ export function resolveDishImage(name = "") {
 
 export default function MenuSection({ refreshTrigger }) {
   const { addItem } = useCart();
+  const sectionRef = useRef(null);
+
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("ALL");
@@ -385,8 +422,9 @@ export default function MenuSection({ refreshTrigger }) {
       .then((res) => {
         const results = res.data.results || res.data || [];
         setItems(results);
-        setTotalCount(res.data.count || results.length);
-        setTotalPages(Math.ceil((res.data.count || results.length) / 10) || 1);
+        const count = res.data.count || results.length;
+        setTotalCount(count);
+        setTotalPages(Math.ceil(count / 10) || 1);
       })
       .catch(() => {
         setItems([]);
@@ -394,6 +432,13 @@ export default function MenuSection({ refreshTrigger }) {
         setTotalPages(1);
       });
   }, [selectedCategory, searchQuery, ordering, page, refreshTrigger]);
+
+  const changePage = (newPage) => {
+    setPage(newPage);
+    if (sectionRef.current) {
+      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const handleCategoryChange = (catId) => {
     setSelectedCategory(catId);
@@ -420,8 +465,11 @@ export default function MenuSection({ refreshTrigger }) {
     return `${numeric.toLocaleString()} RWF`;
   };
 
+  const startItemIndex = totalCount === 0 ? 0 : (page - 1) * 10 + 1;
+  const endItemIndex = Math.min(page * 10, totalCount);
+
   return (
-    <Section id="menu">
+    <Section id="menu" ref={sectionRef}>
       <SectionHeader>
         <Tagline>Chef's Kitchen</Tagline>
         <SectionTitle>Our Menu</SectionTitle>
@@ -510,25 +558,37 @@ export default function MenuSection({ refreshTrigger }) {
           </DishesGrid>
 
           {totalPages > 1 && (
-            <PaginationBar>
-              <PageBtn
-                disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                <ChevronLeft size={16} /> Previous
-              </PageBtn>
+            <PaginationContainer>
+              <ItemRangeCounter>
+                Showing {startItemIndex}–{endItemIndex} of {totalCount} culinary creations
+              </ItemRangeCounter>
 
-              <PageIndicator>
-                Page {page} of {totalPages} ({totalCount} items)
-              </PageIndicator>
+              <PaginationControls>
+                <NavPageBtn
+                  disabled={page <= 1}
+                  onClick={() => changePage(Math.max(1, page - 1))}
+                >
+                  <ChevronLeft size={16} /> Previous
+                </NavPageBtn>
 
-              <PageBtn
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              >
-                Next <ChevronRight size={16} />
-              </PageBtn>
-            </PaginationBar>
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pNum) => (
+                  <NumberPill
+                    key={pNum}
+                    $active={page === pNum}
+                    onClick={() => changePage(pNum)}
+                  >
+                    {pNum}
+                  </NumberPill>
+                ))}
+
+                <NavPageBtn
+                  disabled={page >= totalPages}
+                  onClick={() => changePage(Math.min(totalPages, page + 1))}
+                >
+                  Next <ChevronRight size={16} />
+                </NavPageBtn>
+              </PaginationControls>
+            </PaginationContainer>
           )}
         </>
       )}
