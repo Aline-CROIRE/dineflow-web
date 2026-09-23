@@ -81,6 +81,20 @@ const NavLink = styled.a`
   color: ${({ theme }) => theme.colors.latte};
   font-size: 14px;
   font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.vanilla};
+  }
+`;
+
+const NavButton = styled.button`
+  background: transparent;
+  color: ${({ theme }) => theme.colors.latte};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
   transition: color 0.2s ease;
 
   &:hover {
@@ -205,7 +219,7 @@ const MobileDrawer = styled.div`
   }
 `;
 
-export default function Navbar({ onOpenAuth }) {
+export default function Navbar({ onOpenAuth, onOpenReservation }) {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [serviceStatus, setServiceStatus] = useState("Open");
@@ -234,8 +248,7 @@ export default function Navbar({ onOpenAuth }) {
 
         <NavLinks>
           <NavLink href="#menu">Menu</NavLink>
-          <NavLink href="#reservations">Reservations</NavLink>
-          <NavLink href="#orders">My Orders</NavLink>
+          <NavButton onClick={onOpenReservation}>Reservations</NavButton>
 
           <StatusBadge>
             <StatusDot $isOpen={serviceStatus === "Open"} />
@@ -270,12 +283,21 @@ export default function Navbar({ onOpenAuth }) {
           <NavLink href="#menu" onClick={() => setIsOpen(false)}>
             Menu
           </NavLink>
-          <NavLink href="#reservations" onClick={() => setIsOpen(false)}>
+          <button
+            onClick={() => {
+              onOpenReservation();
+              setIsOpen(false);
+            }}
+            style={{
+              padding: "8px 0",
+              background: "transparent",
+              color: "#E7C6A1",
+              textAlign: "left",
+              fontWeight: 600,
+            }}
+          >
             Reservations
-          </NavLink>
-          <NavLink href="#orders" onClick={() => setIsOpen(false)}>
-            My Orders
-          </NavLink>
+          </button>
           {user ? (
             <button
               onClick={() => {

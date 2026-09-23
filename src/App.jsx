@@ -5,6 +5,7 @@ import { GlobalStyles } from "./theme/GlobalStyles";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import AuthModal from "./components/AuthModal";
+import ReservationModal from "./components/ReservationModal";
 import MenuSection from "./components/MenuSection";
 import apiClient from "./api/client";
 import { ArrowRight, CalendarDays, Clock, ShieldCheck, RefreshCw } from "lucide-react";
@@ -221,6 +222,7 @@ const RefreshBtn = styled.button`
 function MainDashboard() {
   const { user } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [reservationModalOpen, setReservationModalOpen] = useState(false);
   const [status, setStatus] = useState(null);
 
   const fetchStatus = () => {
@@ -234,9 +236,20 @@ function MainDashboard() {
     fetchStatus();
   }, []);
 
+  const handleOpenReservation = () => {
+    if (!user) {
+      setAuthModalOpen(true);
+    } else {
+      setReservationModalOpen(true);
+    }
+  };
+
   return (
     <AppContainer>
-      <Navbar onOpenAuth={() => setAuthModalOpen(true)} />
+      <Navbar
+        onOpenAuth={() => setAuthModalOpen(true)}
+        onOpenReservation={handleOpenReservation}
+      />
 
       <MainContent>
         <Grid>
@@ -257,7 +270,7 @@ function MainDashboard() {
                 <ArrowRight size={18} />
               </PrimaryActionButton>
 
-              <SecondaryActionButton onClick={() => (!user ? setAuthModalOpen(true) : null)}>
+              <SecondaryActionButton onClick={handleOpenReservation}>
                 <CalendarDays size={18} />
                 Reserve Table
               </SecondaryActionButton>
@@ -307,6 +320,10 @@ function MainDashboard() {
       <MenuSection onSelectItem={(item) => console.log("Selected dish:", item)} />
 
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      <ReservationModal
+        isOpen={reservationModalOpen}
+        onClose={() => setReservationModalOpen(false)}
+      />
     </AppContainer>
   );
 }
