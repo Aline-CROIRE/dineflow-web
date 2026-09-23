@@ -362,7 +362,6 @@ function MainDashboard() {
           <Grid>
             <HeroTextContainer>
               <Badge>
-                <Sparkles size={12} />
                 Artisanal Kitchen & Lounge
               </Badge>
 
