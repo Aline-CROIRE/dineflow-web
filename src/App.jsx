@@ -14,7 +14,7 @@ import ProfileModal from "./components/ProfileModal";
 import MenuSection from "./components/MenuSection";
 import AmbientArtCanvas from "./components/AmbientArtCanvas";
 import apiClient from "./api/client";
-import { ArrowRight, CalendarDays, ShoppingBag, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarDays, ShoppingBag, Sparkles, Star } from "lucide-react";
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -171,11 +171,11 @@ const ShowcaseWrapper = styled.div`
 
 const ShowcaseGlow = styled.div`
   position: absolute;
-  inset: -10px;
+  inset: -12px;
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  opacity: 0.16;
-  filter: blur(35px);
-  border-radius: 32px;
+  opacity: 0.18;
+  filter: blur(40px);
+  border-radius: 36px;
   z-index: 0;
 `;
 
@@ -183,7 +183,7 @@ const ShowcaseCard = styled.div`
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 540px;
+  max-width: 520px;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 26px;
@@ -191,13 +191,13 @@ const ShowcaseCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 14px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7);
 `;
 
 const DishImageFrame = styled.div`
   position: relative;
   width: 100%;
-  height: clamp(170px, 26vh, 240px);
+  height: clamp(180px, 26vh, 250px);
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -216,18 +216,35 @@ const FloatingSpecialTag = styled.div`
   left: 12px;
   background: ${({ theme }) => theme.gradients.caramelMocha};
   color: ${({ theme }) => theme.colors.vanilla};
-  padding: 5px 14px;
+  padding: 6px 14px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+`;
+
+const RatingPill = styled.div`
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background-color: rgba(25, 21, 21, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.latte};
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 `;
 
 const ShowcaseFooter = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 `;
@@ -235,36 +252,45 @@ const ShowcaseFooter = styled.div`
 const DishMeta = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 `;
 
 const DishTitle = styled.h3`
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 900;
   color: ${({ theme }) => theme.colors.vanilla};
 `;
 
 const DishTagline = styled.span`
-  font-size: 12px;
+  font-size: 13px;
   color: ${({ theme }) => theme.colors.textMuted};
+  line-height: 1.4;
 `;
 
-const PricePill = styled.span`
-  font-size: 16px;
-  font-weight: 900;
-  color: ${({ theme }) => theme.colors.latte};
+const CulinaryChipsRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+`;
+
+const CulinaryChip = styled.span`
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
   background-color: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 6px 14px;
-  border-radius: 12px;
-  flex-shrink: 0;
+  color: ${({ theme }) => theme.colors.latte};
 `;
 
 const TableServiceBar = styled.div`
   background: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 12px;
-  padding: 10px 16px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -399,14 +425,22 @@ function MainDashboard() {
                     loading="lazy"
                   />
                   <FloatingSpecialTag>Chef's Signature</FloatingSpecialTag>
+                  <RatingPill>
+                    <Star size={11} fill="#FF9F1C" color="#FF9F1C" />
+                    4.9 (180+ Reviews)
+                  </RatingPill>
                 </DishImageFrame>
 
                 <ShowcaseFooter>
                   <DishMeta>
-                    <DishTitle>Charcoal Grilled Ribeye</DishTitle>
-                    <DishTagline>Aromatic herbs, garlic butter, roasted asparagus</DishTagline>
+                    <DishTitle>Charcoal Grilled Prime Ribeye</DishTitle>
+                    <DishTagline>Aromatic herbs, garlic-infused butter, fire-roasted asparagus</DishTagline>
+                    <CulinaryChipsRow>
+                      <CulinaryChip>Wood-Smoked</CulinaryChip>
+                      <CulinaryChip>Prime Cut</CulinaryChip>
+                      <CulinaryChip>House Glaze</CulinaryChip>
+                    </CulinaryChipsRow>
                   </DishMeta>
-                  <PricePill>28,000 RWF</PricePill>
                 </ShowcaseFooter>
 
                 <TableServiceBar>

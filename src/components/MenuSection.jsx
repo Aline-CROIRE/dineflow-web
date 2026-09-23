@@ -151,20 +151,46 @@ const DishesGrid = styled.div`
 const DishCard = styled.div`
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 18px;
-  padding: clamp(18px, 4vw, 24px);
+  border-radius: 20px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 16px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   transition: transform 0.2s ease, border-color 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     border-color: ${({ theme }) => theme.colors.burntCaramel};
   }
+`;
+
+const CardImageContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 190px;
+  overflow: hidden;
+  background-color: ${({ theme }) => theme.colors.cardElevated};
+`;
+
+const CardImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+
+  ${DishCard}:hover & {
+    transform: scale(1.04);
+  }
+`;
+
+const CardBody = styled.div`
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  gap: 14px;
 `;
 
 const DishHeader = styled.div`
@@ -236,6 +262,55 @@ const EmptyState = styled.div`
   color: ${({ theme }) => theme.colors.textMuted};
   font-size: 14px;
 `;
+
+export const FALLBACK_FOOD_IMAGE =
+  "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80";
+
+export function resolveDishImage(name = "") {
+  const n = name.toLowerCase();
+
+  if (n.includes("rice") || n.includes("pilau") || n.includes("biryani")) {
+    return "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("wing") || n.includes("chicken")) {
+    return "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("steak") || n.includes("beef") || n.includes("ribeye") || n.includes("meat") || n.includes("lamb") || n.includes("chop")) {
+    return "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("pizza") || n.includes("margherita") || n.includes("calzone")) {
+    return "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("salmon") || n.includes("fish") || n.includes("prawn") || n.includes("seafood") || n.includes("sambaza") || n.includes("tilapia")) {
+    return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("burger") || n.includes("cheeseburger") || n.includes("sandwich")) {
+    return "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("pasta") || n.includes("carbonara") || n.includes("spaghetti") || n.includes("penne") || n.includes("lasagna")) {
+    return "https://images.unsplash.com/photo-1621996346565-e3d5d62810f4?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("salad") || n.includes("caesar") || n.includes("green") || n.includes("avocado")) {
+    return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("bread") || n.includes("bruschetta") || n.includes("garlic") || n.includes("toast")) {
+    return "https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("fries") || n.includes("chips")) {
+    return "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("juice") || n.includes("water") || n.includes("orange") || n.includes("drink") || n.includes("smoothie") || n.includes("cocktail")) {
+    return "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("coffee") || n.includes("latte") || n.includes("espresso") || n.includes("cappuccino") || n.includes("tea")) {
+    return "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=600&q=80";
+  }
+  if (n.includes("dessert") || n.includes("cake") || n.includes("chocolate") || n.includes("ice cream") || n.includes("pie")) {
+    return "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80";
+  }
+
+  return FALLBACK_FOOD_IMAGE;
+}
 
 export default function MenuSection() {
   const { addItem } = useCart();
@@ -334,26 +409,40 @@ export default function MenuSection() {
         <DishesGrid>
           {items.map((dish) => (
             <DishCard key={dish.id} onClick={() => setSelectedDishModal(dish)}>
-              <div>
-                <DishHeader>
-                  <DishName>{dish.name}</DishName>
-                  <CategoryTag>{dish.category_name || "Special"}</CategoryTag>
-                </DishHeader>
-                <DishDescription>
-                  {dish.description || "Prepared freshly upon order."}
-                </DishDescription>
-              </div>
+              <CardImageContainer>
+                <CardImage
+                  src={resolveDishImage(dish.name)}
+                  alt={dish.name}
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = FALLBACK_FOOD_IMAGE;
+                  }}
+                />
+              </CardImageContainer>
 
-              <DishFooter>
-                <Price>{formatRWF(dish.price)}</Price>
-                <AddButton
-                  $added={addedItemIds[dish.id]}
-                  onClick={(e) => handleDirectAdd(e, dish)}
-                  aria-label="Add to order"
-                >
-                  {addedItemIds[dish.id] ? <Check size={18} /> : <Plus size={18} />}
-                </AddButton>
-              </DishFooter>
+              <CardBody>
+                <div>
+                  <DishHeader>
+                    <DishName>{dish.name}</DishName>
+                    <CategoryTag>{dish.category_name || "Special"}</CategoryTag>
+                  </DishHeader>
+                  <DishDescription>
+                    {dish.description || "Prepared freshly upon order."}
+                  </DishDescription>
+                </div>
+
+                <DishFooter>
+                  <Price>{formatRWF(dish.price)}</Price>
+                  <AddButton
+                    $added={addedItemIds[dish.id]}
+                    onClick={(e) => handleDirectAdd(e, dish)}
+                    aria-label="Add to order"
+                  >
+                    {addedItemIds[dish.id] ? <Check size={18} /> : <Plus size={18} />}
+                  </AddButton>
+                </DishFooter>
+              </CardBody>
             </DishCard>
           ))}
         </DishesGrid>
