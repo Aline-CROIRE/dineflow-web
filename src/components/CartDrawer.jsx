@@ -454,7 +454,7 @@ export default function CartDrawer({ onRequireAuth }) {
                   <ItemDetails>
                     <ItemName>{dish.name}</ItemName>
                     <ItemPrice>
-                      {(Math.round(parseFloat(dish.price) || 0) * dish.quantity).toLocaleString()} RWF
+                      {Math.round((parseFloat(dish.price) || 0) * dish.quantity).toLocaleString()} RWF
                     </ItemPrice>
                   </ItemDetails>
 

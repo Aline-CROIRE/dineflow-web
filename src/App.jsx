@@ -19,50 +19,46 @@ const AppContainer = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 `;
 
 const MainContent = styled.main`
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-  padding: 60px 24px 20px;
+  padding: clamp(32px, 6vw, 60px) clamp(16px, 4vw, 24px) 20px;
   display: flex;
   align-items: center;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    padding: 40px 20px 20px;
-  }
 `;
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 60px;
+  grid-template-columns: 1fr;
+  gap: clamp(32px, 6vw, 60px);
   align-items: center;
   width: 100%;
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
-    grid-template-columns: 1fr;
-    gap: 40px;
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    grid-template-columns: 1.15fr 0.85fr;
   }
 `;
 
 const HeroTextContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: clamp(16px, 3vw, 24px);
 `;
 
 const Badge = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: 999px;
   background: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.latte};
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -70,15 +66,12 @@ const Badge = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 54px;
+  font-size: clamp(28px, 6vw, 54px);
   font-weight: 900;
   line-height: 1.15;
   letter-spacing: -0.5px;
   color: ${({ theme }) => theme.colors.textPrimary};
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    font-size: 38px;
-  }
+  word-break: break-word;
 `;
 
 const GradientText = styled.span`
@@ -88,49 +81,56 @@ const GradientText = styled.span`
 `;
 
 const Subtitle = styled.p`
-  font-size: 18px;
+  font-size: clamp(14px, 2.5vw, 17px);
   color: ${({ theme }) => theme.colors.textMuted};
   line-height: 1.6;
   max-width: 520px;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    font-size: 16px;
-  }
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 4px;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    width: 100%;
+  }
 `;
 
 const PrimaryActionButton = styled.a`
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 32px;
-  border-radius: 14px;
-  font-size: 16px;
+  justify-content: center;
+  gap: 8px;
+  padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 30px);
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 800;
   color: ${({ theme }) => theme.colors.vanilla};
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  box-shadow: 0 10px 25px rgba(123, 75, 58, 0.4);
+  box-shadow: 0 8px 22px rgba(123, 75, 58, 0.35);
   transition: all 0.2s ease;
 
   &:hover {
     background: ${({ theme }) => theme.gradients.caramelMochaHover};
     transform: translateY(-2px);
   }
+
+  @media (max-width: 480px) {
+    width: 100%;
+  }
 `;
 
 const SecondaryActionButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px 28px;
-  border-radius: 14px;
-  font-size: 16px;
+  justify-content: center;
+  gap: 8px;
+  padding: clamp(12px, 3vw, 16px) clamp(18px, 4vw, 26px);
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.latte};
   background-color: ${({ theme }) => theme.colors.card};
@@ -139,22 +139,26 @@ const SecondaryActionButton = styled.button`
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.cardElevated};
-    border-color: ${({ theme }) => theme.colors.latte};
     color: ${({ theme }) => theme.colors.vanilla};
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
   }
 `;
 
 const CardWrapper = styled.div`
   position: relative;
+  width: 100%;
 `;
 
 const CardGlow = styled.div`
   position: absolute;
-  inset: -10px;
+  inset: -8px;
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  opacity: 0.12;
-  filter: blur(40px);
-  border-radius: 30px;
+  opacity: 0.1;
+  filter: blur(30px);
+  border-radius: 28px;
   z-index: 0;
 `;
 
@@ -163,12 +167,12 @@ const StatusCard = styled.div`
   z-index: 1;
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 28px;
-  padding: 36px;
+  border-radius: clamp(20px, 4vw, 28px);
+  padding: clamp(20px, 4vw, 32px);
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  gap: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 `;
 
 const CardHeader = styled.div`
@@ -176,36 +180,40 @@ const CardHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  padding-bottom: 18px;
+  padding-bottom: 14px;
 `;
 
 const MetricsGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
+
+  @media (min-width: 420px) {
+    grid-template-columns: 1fr 1fr;
+  }
 `;
 
 const MetricTile = styled.div`
-  padding: 18px;
-  border-radius: 18px;
+  padding: clamp(12px, 3vw, 16px);
+  border-radius: 14px;
   background-color: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 `;
 
 const MetricLabel = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textMuted};
 `;
 
 const MetricValue = styled.span`
-  font-size: 28px;
+  font-size: clamp(22px, 4vw, 26px);
   font-weight: 900;
   color: ${({ $highlight, theme }) => ($highlight ? theme.colors.success : theme.colors.vanilla)};
 `;
@@ -214,32 +222,34 @@ const RefreshBtn = styled.button`
   background: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
   padding: 8px;
-  border-radius: 10px;
+  border-radius: 8px;
   color: ${({ theme }) => theme.colors.latte};
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
 
   &:hover {
     color: ${({ theme }) => theme.colors.vanilla};
-    border-color: ${({ theme }) => theme.colors.burntCaramel};
   }
 `;
 
 const MobileStickyBar = styled.button`
   position: fixed;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
   z-index: 90;
   background: ${({ theme }) => theme.gradients.caramelMocha};
   color: ${({ theme }) => theme.colors.vanilla};
-  border-radius: 16px;
-  padding: 16px 20px;
+  border-radius: 14px;
+  padding: 14px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
 
-  @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
     display: none;
   }
 `;
@@ -307,11 +317,11 @@ function MainDashboard() {
             <ButtonGroup>
               <PrimaryActionButton href="#menu">
                 View Menu
-                <ArrowRight size={18} />
+                <ArrowRight size={16} />
               </PrimaryActionButton>
 
               <SecondaryActionButton onClick={handleOpenReservation}>
-                <CalendarDays size={18} />
+                <CalendarDays size={16} />
                 Reserve Table
               </SecondaryActionButton>
             </ButtonGroup>
@@ -322,7 +332,7 @@ function MainDashboard() {
             <StatusCard>
               <CardHeader>
                 <div>
-                  <h3 style={{ fontSize: "18px", fontWeight: 800, color: theme.colors.vanilla }}>
+                  <h3 style={{ fontSize: "16px", fontWeight: 800, color: theme.colors.vanilla }}>
                     Dining Room Status
                   </h3>
                   <p style={{ fontSize: "12px", color: theme.colors.textMuted }}>
@@ -331,14 +341,14 @@ function MainDashboard() {
                 </div>
 
                 <RefreshBtn onClick={fetchStatus}>
-                  <RefreshCw size={16} />
+                  <RefreshCw size={15} />
                 </RefreshBtn>
               </CardHeader>
 
               <MetricsGrid>
                 <MetricTile>
                   <MetricLabel>
-                    <Clock size={14} />
+                    <Clock size={13} />
                     Dining Service
                   </MetricLabel>
                   <MetricValue $highlight>{status?.status || "OPEN"}</MetricValue>
@@ -346,7 +356,7 @@ function MainDashboard() {
 
                 <MetricTile>
                   <MetricLabel>
-                    <ShieldCheck size={14} />
+                    <ShieldCheck size={13} />
                     Available Tables
                   </MetricLabel>
                   <MetricValue>{status?.available_tables ?? "--"}</MetricValue>
@@ -361,11 +371,11 @@ function MainDashboard() {
 
       {totalItemsCount > 0 && (
         <MobileStickyBar onClick={() => setIsDrawerOpen(true)}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <ShoppingBag size={18} />
-            <span style={{ fontWeight: 800, fontSize: "14px" }}>{totalItemsCount} Dishes</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <ShoppingBag size={17} />
+            <span style={{ fontWeight: 800, fontSize: "13px" }}>{totalItemsCount} Dishes</span>
           </div>
-          <span style={{ fontWeight: 900, fontSize: "15px" }}>{totalAmountRWF.toLocaleString()} RWF →</span>
+          <span style={{ fontWeight: 900, fontSize: "14px" }}>{totalAmountRWF.toLocaleString()} RWF →</span>
         </MobileStickyBar>
       )}
 

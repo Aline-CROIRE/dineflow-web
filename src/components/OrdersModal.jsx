@@ -336,7 +336,7 @@ export default function OrdersModal({ isOpen, onClose }) {
               {(selectedReceipt.items || []).map((it) => (
                 <div key={it.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#FFF0DC" }}>
                   <span>{it.quantity}x {it.menu_item_name}</span>
-                  <span>{(Math.round(parseFloat(it.unit_price)) * it.quantity).toLocaleString()} RWF</span>
+                  <span>{Math.round(parseFloat(it.unit_price) * it.quantity).toLocaleString()} RWF</span>
                 </div>
               ))}
             </div>
@@ -397,7 +397,7 @@ export default function OrdersModal({ isOpen, onClose }) {
                       {(o.items || []).map((it) => (
                         <ItemLine key={it.id}>
                           <span>{it.quantity}x {it.menu_item_name}</span>
-                          <span>{(Math.round(parseFloat(it.unit_price)) * it.quantity).toLocaleString()} RWF</span>
+                          <span>{Math.round(parseFloat(it.unit_price) * it.quantity).toLocaleString()} RWF</span>
                         </ItemLine>
                       ))}
                     </ItemsSummary>

@@ -542,7 +542,7 @@ export default function StaffDashboardModal({ isOpen, onClose }) {
                     {(o.items || []).map((it) => (
                       <div key={it.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#E7C6A1" }}>
                         <span>{it.quantity}x {it.menu_item_name}</span>
-                        <span>{(Math.round(parseFloat(it.unit_price)) * it.quantity).toLocaleString()} RWF</span>
+                        <span>{Math.round(parseFloat(it.unit_price) * it.quantity).toLocaleString()} RWF</span>
                       </div>
                     ))}
                   </div>

@@ -43,9 +43,11 @@ export function CartProvider({ children }) {
 
   const totalItemsCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
-  const totalAmountRWF = items.reduce(
-    (sum, i) => sum + Math.round(parseFloat(i.price) || 0) * i.quantity,
-    0
+  const totalAmountRWF = Math.round(
+    items.reduce(
+      (sum, i) => sum + (parseFloat(i.price) || 0) * i.quantity,
+      0
+    )
   );
 
   return (

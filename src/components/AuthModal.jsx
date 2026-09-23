@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
-import { X } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const fadeIn = keyframes`
@@ -102,7 +102,6 @@ const CloseBtn = styled.button`
   &:hover {
     color: ${({ theme }) => theme.colors.vanilla};
     border-color: ${({ theme }) => theme.colors.burntCaramel};
-    transform: rotate(90deg);
   }
 `;
 
@@ -147,7 +146,15 @@ const Label = styled.label`
   color: ${({ theme }) => theme.colors.latte};
 `;
 
+const PasswordFieldWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+`;
+
 const Input = styled.input`
+  width: 100%;
   background-color: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 12px;
@@ -164,6 +171,26 @@ const Input = styled.input`
     border-color: ${({ theme }) => theme.colors.burntCaramel};
     box-shadow: 0 0 0 3px rgba(201, 124, 93, 0.18);
     background-color: #2D2424;
+  }
+`;
+
+const PasswordInput = styled(Input)`
+  padding-right: 44px;
+`;
+
+const EyeToggleBtn = styled.button`
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.latte};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.vanilla};
   }
 `;
 
@@ -231,6 +258,9 @@ export default function AuthModal({ isOpen, onClose }) {
   const [tab, setTab] = useState("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -352,15 +382,24 @@ export default function AuthModal({ isOpen, onClose }) {
 
             <FieldGroup>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                name="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+              <PasswordFieldWrapper>
+                <PasswordInput
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <EyeToggleBtn
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </EyeToggleBtn>
+              </PasswordFieldWrapper>
             </FieldGroup>
 
             <SubmitBtn type="submit" disabled={loading}>
@@ -420,28 +459,46 @@ export default function AuthModal({ isOpen, onClose }) {
 
             <FieldGroup>
               <Label htmlFor="reg-password">Password</Label>
-              <Input
-                id="reg-password"
-                type="password"
-                name="password"
-                placeholder="At least 8 characters"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+              <PasswordFieldWrapper>
+                <PasswordInput
+                  id="reg-password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="At least 8 characters"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <EyeToggleBtn
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </EyeToggleBtn>
+              </PasswordFieldWrapper>
             </FieldGroup>
 
             <FieldGroup>
               <Label htmlFor="reg-confirm">Confirm Password</Label>
-              <Input
-                id="reg-confirm"
-                type="password"
-                name="password_confirm"
-                placeholder="Re-enter password"
-                value={formData.password_confirm}
-                onChange={handleChange}
-                required
-              />
+              <PasswordFieldWrapper>
+                <PasswordInput
+                  id="reg-confirm"
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="password_confirm"
+                  placeholder="Re-enter password"
+                  value={formData.password_confirm}
+                  onChange={handleChange}
+                  required
+                />
+                <EyeToggleBtn
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </EyeToggleBtn>
+              </PasswordFieldWrapper>
             </FieldGroup>
 
             <SubmitBtn type="submit" disabled={loading}>

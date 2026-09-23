@@ -8,16 +8,16 @@ import DishDetailModal from "./DishDetailModal";
 const Section = styled.section`
   max-width: 1280px;
   margin: 0 auto;
-  padding: 40px 24px 80px;
+  padding: 30px clamp(16px, 4vw, 24px) 80px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 `;
 
 const Tagline = styled.span`
@@ -29,7 +29,7 @@ const Tagline = styled.span`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: clamp(28px, 4vw, 38px);
+  font-size: clamp(24px, 5vw, 36px);
   font-weight: 900;
   letter-spacing: -0.5px;
   color: ${({ theme }) => theme.colors.vanilla};
@@ -38,9 +38,9 @@ const SectionTitle = styled.h2`
 const ControlsBar = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 
-  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+  @media (min-width: 640px) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -50,7 +50,11 @@ const ControlsBar = styled.div`
 const SearchWrapper = styled.div`
   position: relative;
   width: 100%;
-  max-width: 360px;
+  max-width: 100%;
+
+  @media (min-width: 640px) {
+    max-width: 360px;
+  }
 `;
 
 const SearchIconWrapper = styled.div`
@@ -79,7 +83,6 @@ const SearchInput = styled.input`
 
   &:focus {
     border-color: ${({ theme }) => theme.colors.burntCaramel};
-    background-color: ${({ theme }) => theme.colors.cardElevated};
   }
 `;
 
@@ -87,12 +90,17 @@ const SortSelect = styled.select`
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 12px 14px;
   font-size: 13px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.latte};
   cursor: pointer;
   outline: none;
+  width: 100%;
+
+  @media (min-width: 640px) {
+    width: auto;
+  }
 
   &:focus {
     border-color: ${({ theme }) => theme.colors.burntCaramel};
@@ -102,9 +110,10 @@ const SortSelect = styled.select`
 const CategoryTabsTrack = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   overflow-x: auto;
   padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
     height: 4px;
@@ -116,54 +125,54 @@ const CategoryTabsTrack = styled.div`
 `;
 
 const CategoryChip = styled.button`
-  padding: 8px 18px;
+  padding: 8px 16px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
+  flex-shrink: 0;
   color: ${({ $active, theme }) => ($active ? theme.colors.vanilla : theme.colors.latte)};
   background: ${({ $active, theme }) =>
     $active ? theme.gradients.caramelMocha : theme.colors.card};
   border: 1px solid
     ${({ $active, theme }) => ($active ? "transparent" : theme.colors.border)};
-  box-shadow: ${({ $active }) => ($active ? "0 4px 14px rgba(123, 75, 58, 0.35)" : "none")};
   transition: all 0.2s ease;
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.burntCaramel};
-    color: ${({ theme }) => theme.colors.vanilla};
   }
 `;
 
 const DishesGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: 16px;
 
-  @media (min-width: ${({ theme }) => theme.breakpoints.mobile}) {
+  @media (min-width: 600px) {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @media (min-width: ${({ theme }) => theme.breakpoints.desktop}) {
+  @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
   }
 `;
 
 const DishCard = styled.div`
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 20px;
-  padding: 24px;
+  border-radius: 18px;
+  padding: clamp(18px, 4vw, 24px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 18px;
+  gap: 16px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   transition: transform 0.2s ease, border-color 0.2s ease;
 
   &:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     border-color: ${({ theme }) => theme.colors.burntCaramel};
   }
 `;
@@ -176,20 +185,21 @@ const DishHeader = styled.div`
 `;
 
 const DishName = styled.h3`
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
   color: ${({ theme }) => theme.colors.vanilla};
 `;
 
 const CategoryTag = styled.span`
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   color: ${({ theme }) => theme.colors.latte};
   background-color: ${({ theme }) => theme.colors.cardElevated};
-  padding: 4px 10px;
-  border-radius: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
   border: 1px solid ${({ theme }) => theme.colors.border};
+  flex-shrink: 0;
 `;
 
 const DishDescription = styled.p`
@@ -202,21 +212,20 @@ const DishFooter = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
 const Price = styled.span`
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 900;
   color: ${({ theme }) => theme.colors.vanilla};
-  letter-spacing: 0.5px;
 `;
 
 const AddButton = styled.button`
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   background: ${({ $added, theme }) =>
     $added ? theme.colors.success : theme.gradients.caramelMocha};
   color: ${({ theme }) => theme.colors.vanilla};
@@ -224,14 +233,10 @@ const AddButton = styled.button`
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.15s ease, background 0.2s ease;
+  transition: transform 0.15s ease;
 
   &:hover {
     transform: scale(1.05);
-  }
-
-  &:active {
-    transform: scale(0.95);
   }
 `;
 
@@ -239,7 +244,7 @@ const EmptyState = styled.div`
   text-align: center;
   padding: 60px 20px;
   color: ${({ theme }) => theme.colors.textMuted};
-  font-size: 15px;
+  font-size: 14px;
 `;
 
 export default function MenuSection() {
@@ -302,7 +307,7 @@ export default function MenuSection() {
             <Search size={16} />
           </SearchIconWrapper>
           <SearchInput
-            placeholder="Search dishes or ingredients..."
+            placeholder="Search dishes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />

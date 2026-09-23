@@ -9,36 +9,39 @@ const Header = styled.header`
   top: 0;
   z-index: 50;
   backdrop-filter: blur(14px);
-  background-color: rgba(25, 21, 21, 0.88);
+  -webkit-backdrop-filter: blur(14px);
+  background-color: rgba(25, 21, 21, 0.9);
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
 const Container = styled.div`
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px;
-  height: 80px;
+  padding: 0 clamp(16px, 3vw, 24px);
+  height: clamp(68px, 8vw, 80px);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 `;
 
 const LogoWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   cursor: pointer;
+  flex-shrink: 0;
 `;
 
 const LogoBadge = styled.div`
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: clamp(36px, 5vw, 42px);
+  height: clamp(36px, 5vw, 42px);
+  border-radius: 10px;
   background: ${({ theme }) => theme.gradients.caramelMocha};
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px rgba(123, 75, 58, 0.35);
+  box-shadow: 0 6px 16px rgba(123, 75, 58, 0.35);
 `;
 
 const BrandText = styled.div`
@@ -47,33 +50,33 @@ const BrandText = styled.div`
 `;
 
 const BrandTitle = styled.span`
-  font-size: 24px;
+  font-size: clamp(18px, 4vw, 22px);
   font-weight: 900;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   background: ${({ theme }) => theme.gradients.accentGradient};
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 `;
 
 const BrandSubtitle = styled.span`
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   color: ${({ theme }) => theme.colors.textMuted};
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+  @media (max-width: 640px) {
     display: none;
   }
 `;
 
 const NavLinks = styled.nav`
-  display: flex;
+  display: none;
   align-items: center;
-  gap: 28px;
+  gap: 24px;
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    display: none;
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: flex;
   }
 `;
 
@@ -105,7 +108,8 @@ const NavButton = styled.button`
 const RightCluster = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: clamp(8px, 2vw, 14px);
+  flex-shrink: 0;
 `;
 
 const CartButton = styled.button`
@@ -113,8 +117,8 @@ const CartButton = styled.button`
   background-color: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.vanilla};
-  padding: 10px;
-  border-radius: 12px;
+  padding: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -142,25 +146,30 @@ const CartBadge = styled.span`
 `;
 
 const StaffBadge = styled.button`
+  display: none;
   background: ${({ theme }) => theme.colors.cardElevated};
   border: 1px solid ${({ theme }) => theme.colors.burntCaramel};
   color: ${({ theme }) => theme.colors.latte};
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  padding: 8px 14px;
-  border-radius: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
   transition: all 0.2s;
 
   &:hover {
     background: ${({ theme }) => theme.colors.card};
     color: ${({ theme }) => theme.colors.vanilla};
   }
+
+  @media (min-width: 480px) {
+    display: inline-block;
+  }
 `;
 
 const UserBadge = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 `;
 
 const UserClickArea = styled.button`
@@ -172,13 +181,21 @@ const UserClickArea = styled.button`
 `;
 
 const Username = styled.span`
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.vanilla};
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    max-width: 70px;
+  }
 `;
 
 const RoleTag = styled.span`
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   color: ${({ theme }) => theme.colors.latte};
   letter-spacing: 0.5px;
@@ -187,23 +204,18 @@ const RoleTag = styled.span`
 const ActionButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-size: 14px;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.vanilla};
   background: ${({ theme }) => theme.gradients.caramelMocha};
-  box-shadow: 0 6px 18px rgba(123, 75, 58, 0.3);
+  box-shadow: 0 4px 14px rgba(123, 75, 58, 0.3);
   transition: all 0.2s ease;
 
   &:hover {
     background: ${({ theme }) => theme.gradients.caramelMochaHover};
-    transform: translateY(-1px);
-  }
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    display: none;
   }
 `;
 
@@ -212,7 +224,7 @@ const LogoutButton = styled.button`
   border: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.latte};
   padding: 8px;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -225,17 +237,45 @@ const LogoutButton = styled.button`
 `;
 
 const MobileMenuButton = styled.button`
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: ${({ theme }) => theme.colors.card};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 8px;
+  padding: 7px;
   color: ${({ theme }) => theme.colors.vanilla};
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: none;
+  }
+`;
+
+const MobileDrawer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px 24px;
+  background-color: ${({ theme }) => theme.colors.background};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    display: none;
+  }
+`;
+
+const DrawerLink = styled.button`
+  background: transparent;
+  color: ${({ theme }) => theme.colors.latte};
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(59, 49, 49, 0.4);
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.vanilla};
   }
 `;
 
@@ -257,7 +297,7 @@ export default function Navbar({
       <Container>
         <LogoWrapper>
           <LogoBadge>
-            <UtensilsCrossed size={22} color="#FFF0DC" />
+            <UtensilsCrossed size={18} color="#FFF0DC" />
           </LogoBadge>
           <BrandText>
             <BrandTitle>DINEFLOW</BrandTitle>
@@ -276,9 +316,13 @@ export default function Navbar({
 
         <RightCluster>
           <CartButton onClick={() => setIsDrawerOpen(true)} title="View Order">
-            <ShoppingBag size={18} />
+            <ShoppingBag size={17} />
             {totalItemsCount > 0 && <CartBadge>{totalItemsCount}</CartBadge>}
           </CartButton>
+
+          {isStaffOrAdmin && (
+            <StaffBadge onClick={onOpenStaff}>Operations</StaffBadge>
+          )}
 
           {user ? (
             <UserBadge>
@@ -287,21 +331,83 @@ export default function Navbar({
                 <RoleTag>{user.role}</RoleTag>
               </UserClickArea>
               <LogoutButton onClick={logout} title="Sign Out">
-                <LogOut size={16} />
+                <LogOut size={15} />
               </LogoutButton>
             </UserBadge>
           ) : (
             <ActionButton onClick={onOpenAuth}>
-              <LogIn size={16} />
+              <LogIn size={15} />
               Sign In
             </ActionButton>
           )}
 
           <MobileMenuButton onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={20} /> : <Menu size={20} />}
           </MobileMenuButton>
         </RightCluster>
       </Container>
+
+      {isOpen && (
+        <MobileDrawer>
+          <DrawerLink
+            onClick={() => {
+              setIsOpen(false);
+              window.location.hash = "#menu";
+            }}
+          >
+            Our Menu
+          </DrawerLink>
+          <DrawerLink
+            onClick={() => {
+              setIsOpen(false);
+              onOpenReservation();
+            }}
+          >
+            Table Reservations
+          </DrawerLink>
+          {user && (
+            <DrawerLink
+              onClick={() => {
+                setIsOpen(false);
+                onOpenOrders();
+              }}
+            >
+              My Orders & Receipts
+            </DrawerLink>
+          )}
+          {isStaffOrAdmin && (
+            <DrawerLink
+              onClick={() => {
+                setIsOpen(false);
+                onOpenStaff();
+              }}
+            >
+              Staff Operations
+            </DrawerLink>
+          )}
+          {user ? (
+            <DrawerLink
+              onClick={() => {
+                setIsOpen(false);
+                onOpenProfile();
+              }}
+            >
+              Account Settings
+            </DrawerLink>
+          ) : (
+            <ActionButton
+              style={{ width: "100%", justifyContent: "center", marginTop: "8px" }}
+              onClick={() => {
+                setIsOpen(false);
+                onOpenAuth();
+              }}
+            >
+              <LogIn size={15} />
+              Sign In
+            </ActionButton>
+          )}
+        </MobileDrawer>
+      )}
     </Header>
   );
 }
